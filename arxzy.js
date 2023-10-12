@@ -1441,7 +1441,7 @@ ${cpus.map((cpu, i) => `${i + 1}. ${cpu.model.trim()} (${cpu.speed} MHZ)\n${Obje
                 if (!quoted) return newReply(`Kirim Atau Balas Media Dengan Perintah *${prefix + command}*`)
                 if (/image/.test(mime)) {
                     let media = await quoted.download()
-                    let encmedia = await arxzy.sendGambarAsSticker(m.chat, media, m, {
+                    let encmedia = await arxzy.sendImageAsSticker(m.chat, media, m, {
                         packname: packname,
                         author: author
                     })
@@ -1449,7 +1449,7 @@ ${cpus.map((cpu, i) => `${i + 1}. ${cpu.model.trim()} (${cpu.speed} MHZ)\n${Obje
                 } else if (isVidio || /video/.test(mime)) {
                     if ((quoted.msg || quoted).seconds > 11) return newReply('*Maksimal 10 Detik*')
                     let media = await quoted.download()
-                    let encmedia = await arxzy.sendVidioAsSticker(m.chat, media, m, {
+                    let encmedia = await arxzy.sendVideoAsSticker(m.chat, media, m, {
                         packname: packname,
                         author: author
                     })
@@ -1469,7 +1469,7 @@ ${cpus.map((cpu, i) => `${i + 1}. ${cpu.model.trim()} (${cpu.speed} MHZ)\n${Obje
                 let dwnld = await arxzy.downloadAndSaveMediaMessage(qmsg)
                 let fatGans = await TelegraPh(dwnld)
                 let smeme = `https://api.memegen.link/images/custom/${encodeURIComponent(bawah)}/${encodeURIComponent(atas)}.png?background=${fatGans}`
-                let pop = await arxzy.sendGambarAsSticker(m.chat, smeme, m, {
+                let pop = await arxzy.sendImageAsSticker(m.chat, smeme, m, {
                     packname: packname,
                     author: author
                 })
@@ -1602,7 +1602,7 @@ ${cpus.map((cpu, i) => `${i + 1}. ${cpu.model.trim()} (${cpu.speed} MHZ)\n${Obje
                 newReply(mess.wait)
                 let anu = await fetchJson(`https://tenor.googleapis.com/v2/featured?key=AIzaSyAyimkuYQYF_FXVALexPuGQctUWRURdCYQ&contentfilter=high&media_filter=png_transparent&component=proactive&collection=emoji_kitchen_v5&q=${encodeURIComponent(emoji1)}_${encodeURIComponent(emoji2)}`)
                 for (let res of anu.results) {
-                    let encmedia = await arxzy.sendGambarAsSticker(m.chat, res.url, m, {
+                    let encmedia = await arxzy.sendImageAsSticker(m.chat, res.url, m, {
                         packname: global.packname,
                         author: global.author,
                         categories: res.tags
@@ -1615,7 +1615,7 @@ ${cpus.map((cpu, i) => `${i + 1}. ${cpu.model.trim()} (${cpu.speed} MHZ)\n${Obje
                 if (!text) return newReply(`Format: *${prefix + command} 😅*`)
                 let anu = await fetchJson(`https://tenor.googleapis.com/v2/featured?key=AIzaSyAyimkuYQYF_FXVALexPuGQctUWRURdCYQ&contentfilter=high&media_filter=png_transparent&component=proactive&collection=emoji_kitchen_v5&q=${encodeURIComponent(text)}`)
                 for (let res of anu.results) {
-                    let encmedia = await arxzy.sendGambarAsSticker(m.chat, res.url, m, {
+                    let encmedia = await arxzy.sendImageAsSticker(m.chat, res.url, m, {
                         packname: global.packname,
                         author: global.author,
                         categories: res.tags
@@ -2079,7 +2079,7 @@ Silahkan @${m.mentionedJid[0].split`@`[0]} Untuk Ketik terima/tolak`
                     if (tebakkabupaten.hasOwnProperty(m.sender.split('@')[0])) return newReply("*Masih Ada Sesi Permainan Belum Selesai*")
                     let anu = await fetchJson('https://raw.githubusercontent.com/BochilTeam/database/master/games/tebakkabupaten.json')
                     let result = anu[Math.floor(Math.random() * anu.length)]
-                    arxzy.sendGambar(m.chat, result.url, `*TEBAK KABUPATEN*\n\nWaktu: *60 Detik*`, m).then(() => {
+                    arxzy.sendImage(m.chat, result.url, `*TEBAK KABUPATEN*\n\nWaktu: *60 Detik*`, m).then(() => {
                         tebakkabupaten[m.sender.split('@')[0]] = result.title.toLowerCase()
                     })
                     await sleep(60000)
@@ -2437,7 +2437,7 @@ Silahkan @${m.mentionedJid[0].split`@`[0]} Untuk Ketik terima/tolak`
                   let ppnyauser = await await arxzy.profilePictureUrl(m.sender, 'image').catch(_ => 'https://telegra.ph/file/6880771a42bad09dd6087.jpg')
                   const rest = await quote(q, pushname, ppnyauser)
                   newReply(mess.wait)
-                  arxzy.sendGambarAsSticker(m.chat, rest.result, m, {
+                  arxzy.sendImageAsSticker(m.chat, rest.result, m, {
                     packname: `${global.packname}`,
                     author: `${global.author}`
                   })
@@ -2537,7 +2537,7 @@ Silahkan @${m.mentionedJid[0].split`@`[0]} Untuk Ketik terima/tolak`
                 if (!q) return newReply("Format: *.telestick Tautan*")
                 let agg = await fetchJson(`https://api.lolhuman.xyz/api/telestick?apikey=${lol}&url=${q}`)
                 for (var ki = 0; ki < agg.result.sticker.length; ki++) {
-                    await arxzy.sendGambarAsSticker(m.chat, agg.result.sticker[ki], m, {
+                    await arxzy.sendImageAsSticker(m.chat, agg.result.sticker[ki], m, {
                         packname: packname,
                         author: author
                     })
