@@ -1,0 +1,5 @@
+app:
+  name: My App
+  description: This is my Node.js app.
+  auto_restart: true
+  auto_restart_delay: 10 # seconds
