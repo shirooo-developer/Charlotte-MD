@@ -11,6 +11,9 @@ RUN apt-get update && \
 # Instal PM2
 RUN npm install pm2
 
+# Instal sh (jika perlu)
+RUN apt-get install -y sh
+
 COPY package.json .
 
 RUN npm install
