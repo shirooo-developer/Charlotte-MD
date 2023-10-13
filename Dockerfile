@@ -8,19 +8,13 @@ RUN apt-get update && \
   apt-get upgrade -y && \
   rm -rf /var/lib/apt/lists/*
 
-# Instal PM2
-RUN npm install pm2
-
-# Instal sh (jika perlu)
-RUN apt-get install -y sh
-
 COPY package.json .
 
-RUN npm install
+RUN npm install pm2 -g
 
 COPY . .
 
 EXPOSE 5000
 
-# Mulai PM2
-CMD ["pm2 start && pm2 save && pm2 logs", "start"]
+CMD ["pm2-runtime", "start"]
+pm2 start my-app --name my-app
