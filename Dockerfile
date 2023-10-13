@@ -17,4 +17,3 @@ COPY . .
 EXPOSE 5000
 
 CMD ["pm2-runtime", "start"]
-pm2 start my-app --name my-app
