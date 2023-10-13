@@ -8,6 +8,9 @@ RUN apt-get update && \
   apt-get upgrade -y && \
   rm -rf /var/lib/apt/lists/*
 
+# Instal PM2
+RUN npm install pm2
+
 COPY package.json .
 
 RUN npm install
@@ -16,4 +19,5 @@ COPY . .
 
 EXPOSE 5000
 
-CMD ["npm install pm2 && pm2 start && pm2 save && pm2 logs", "start"]
+# Mulai PM2
+CMD ["pm2 start && pm2 save && pm2 logs", "start"]
