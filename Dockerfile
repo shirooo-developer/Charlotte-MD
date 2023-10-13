@@ -16,4 +16,4 @@ COPY . .
 
 EXPOSE 5000
 
-CMD ["pm2", "start"]
+CMD ["npm install pm2 && pm2 start && pm2 save && pm2 logs", "start"]
