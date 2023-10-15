@@ -20,10 +20,10 @@ const fsx = require('fs-extra')
 const path = require('path')
 const util = require('util')
 const chalk = require('chalk')
+const axios = require('axios')
 const moment = require('moment-timezone')
 const speed = require('performance-now')
 const ms = toMs = require('ms')
-const axios = require('axios')
 const fetch = require('node-fetch')
 const {
     exec,
@@ -2426,26 +2426,6 @@ Silahkan @${m.mentionedJid[0].split`@`[0]} Untuk Ketik terima/tolak`
                 }
             }
             break
-
-
-            case 'qc': {
-                const {
-                    quote
-                } = require('./lib/quote.js')
-                if (!q) return newReply('Format: *.qc Teks*')
-                try {
-                  let ppnyauser = await await arxzy.profilePictureUrl(m.sender, 'image').catch(_ => 'https://telegra.ph/file/6880771a42bad09dd6087.jpg')
-                  const rest = await quote(q, pushname, ppnyauser)
-                  newReply(mess.wait)
-                  arxzy.sendImageAsSticker(m.chat, rest.result, m, {
-                    packname: `${global.packname}`,
-                    author: `${global.author}`
-                  })
-                } catch {
-                  newReply(mess.error)
-                }
-            }
-            break
             case 'ttp':
                 if (!q) return newReply('Format: *.ttp Teks*')
                 newReply(mess.wait)
@@ -4335,31 +4315,8 @@ AS: *${as}*
 
   break
 }
-case 'hoshino': {
-  if (!q) return newReply('aq Charlotte, bkn Hoshino')
-
-  const axios = require('axios')
-  const apikey = 'charlotte' // Replace with your API key
-  
-  const query = encodeURIComponent(q)
-  const apiUrl = `https://api.lolhuman.xyz/api/simi?apikey=${lol}&text=${query}&badword=false`
-
-  axios.get(apiUrl)
-    .then(response => {
-      const result = response.data.result
-      
-      // Reply with the generated response from the API
-      newReply(result)
-    })
-    .catch(error => {
-      console.error('Error:', error)
-      newReply('aq Charlotte, bkn Hoshino')
-    })
-
-  break
-}
 case 'charlotte': {
-  if (!q) return newReply('*Iya?*')
+  if (!q) return newReply('Kenapa?')
 
   const axios = require('axios')
   const apikey = 'charlotte' // Replace with your API key
@@ -4376,13 +4333,13 @@ case 'charlotte': {
     })
     .catch(error => {
       console.error('Error:', error)
-      newReply('*???*')
+      newReply('???')
     })
 
   break
 }
 case 'charlotte2': {
-  if (!q) return newReply('*Kenapa?*')
+  if (!q) return newReply('Kenapa?')
 
   const axios = require('axios')
   const apikey = 'charlotte' // Replace with your API key
@@ -4896,12 +4853,6 @@ newReply(mess.wait)
   
   break
 }
-case 'gasm':
-if (!m.isGroup) return newReply(mess.group)
-newReply(mess.wait)						
- waifudd = await axios.get(`https://nekos.life/api/v2/img/${command}`)
-arxzy.sendMessage(m.chat, { caption: mess.success, image: { url:waifudd.data.url } }, { quoted: m })
-break 
 case 'film': {
   if (!q) return newReply(`Format: *.film Judul Film*`)
 newReply(mess.wait)
@@ -6436,9 +6387,13 @@ case 'sound158':
 case 'sound159':
 case 'sound160':
 case 'sound161':
-XeonBotInc_dev = await getBuffer(`https://github.com/Keizha/Tiktokmusic-API/raw/master/tiktokmusic/${command}.mp3`)
-await arxzy.sendMessage(m.chat, { audio: XeonBotInc_dev, mimetype: 'audio/mp4', ptt: true }, { quoted: m })     
-break
+  {
+    const axios = require('axios');
+    const XeonBotInc_dev = await axios.get(`https://github.com/Keizha/Tiktokmusic-API/raw/master/tiktokmusic/${command}.mp3`);
+    await arxzy.sendMessage(m.chat, { audio: XeonBotInc_dev.data, mimetype: 'audio/mp4', ptt: true }, { quoted: m });
+  }
+  break;
+  
 case 'menfess': case 'confess':
 const anon = require('./lib/menfess')
 if (Object.values(anon.anonymous).find(p => p.check(sender))) return newReply("You are still in the room")
@@ -6486,26 +6441,42 @@ console.log("[ CONFESS ] Creating room for: " + sender);
 return newReply(lidt)
 }
 break
+case 'qc': {
+                const {
+                    quote
+                } = require('./lib/quote.js')
+                if (!q) return newReply('Masukan Text')
+                let ppnyauser = await await arxzy.profilePictureUrl(m.sender, 'image').catch(_ => 'https://telegra.ph/file/6880771a42bad09dd6087.jpg')
+                const rest = await quote(q, pushname, ppnyauser)
+                newReply(mess.wait)
+                arxzy.sendImageAsSticker(m.chat, rest.result, m, {
+                    packname: `${global.packname}`,
+                    author: `${global.author}`
+                })
+            }
+            break
+
             case 'menu':
             case 'help':
                 let mono = '```'
                 let menunya = `
-*Hallo ${pushname} 👋*
+*Hᴀʟʟᴏ ${pushname} 👋*
 
 ${readmore}
 *INFO BOT & PENGGUNA*
-• Nama Bot: Charlotte
-• Rilis: 10 Oktober 2023
-• Versi: 0.1.02
-• Total Hit: ${JSON.parse(fs.readFileSync('./src/total-hit-user.json'))[0].hit_cmd} Hit
-• Total Pengguna: ${Object.keys(_user).length} Pengguna
-• Status Pengguna: ${isPremium ? "Premium" : "Tanpa Premium"}
+• Nᴀᴍᴀ Bᴏᴛ: Cʜᴀʀʟᴏᴛᴛᴇ
+• Rɪʟɪs: 10 Oᴋᴛᴏʙᴇʀ 2023
+• Vᴇʀsɪ: 0.1.03
+• Tᴏᴛᴀʟ Hɪᴛ: ${JSON.parse(fs.readFileSync('./src/total-hit-user.json'))[0].hit_cmd} Hɪᴛ
+• Tᴏᴛᴀʟ Pᴇɴɢɢᴜɴᴀ: ${Object.keys(_user).length} Pᴇɴɢɢᴜɴᴀ
+• Sᴛᴀᴛᴜs Pᴇɴɢɢᴜɴᴀ: ${isPremium ? "Pʀᴇᴍɪᴜᴍ" : "Tᴀɴᴘᴀ Pʀᴇᴍɪᴜᴍ"}
 
-*— Gratis Ditambahkan Ke Grup*
-*msha.ke/charlotte_page*
+*Gʀᴀᴛɪs Dɪᴛᴀᴍʙᴀʜᴋᴀɴ Kᴇɢʀᴜᴘ*
+*Lɪʜᴀᴛ Tᴀᴜᴛᴀɴ Dɪʙᴀᴡᴀʜ Iɴɪ*
+*— msha.ke/charlotte_page*
 
 ${readmore}
-Co-Op Yuk *UID: 836400938*
+Cᴏ-Oᴘ Yᴜᴋ *UID: 836400938*
 
 ${readmore}
 *UTAMA*
@@ -6532,7 +6503,6 @@ ${prefix}nhentaisearch
 ${prefix}nhentai
 ${prefix}xnxx
 ${prefix}xnxxdownload
-${prefix}gasm
 ${prefix}18booty
 ${prefix}18armpits
 ${prefix}18anal
