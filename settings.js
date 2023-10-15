@@ -14,7 +14,7 @@ global.numberowner = '6281249122429' // Owner Utama
 global.owner = ['6281249122429'] // Owner Lainnya
 global.namaowner = 'Keizha' // Nama Owner
 global.premium = ["6281249122429"] // Premium User
-global.nobot = '6285163083750'
+global.nobot = '6285159258830'
 /* ~~~~~~~~~ SETTINGS BOT ~~~~~~~~~ */
 global.namabot = 'Charlotte-MD' // NickBot
 global.typemenu = 'v3' // 'v1' > 'v2' > 'v3' > 'v4'
@@ -24,7 +24,7 @@ global.autobio = false // AutoBio
 global.autoblok212 = true // AutoBlock Nomer +212
 global.onlyindo = false  // AutoBlock Selain Nomer Indo
 global.packname = '' // Watermark Sticker
-global.author = '𝗗𝗶𝗯𝘂𝗮𝘁 𝗢𝗹𝗲𝗵 𝗕𝗼𝘁 𝗖𝗵𝗮𝗿𝗹𝗼𝘁𝘁𝗲 - 𝟬𝟴𝟱𝟭𝟲𝟯𝟬𝟴𝟯𝟳𝟱𝟬' // Watermark Sticker
+global.author = '𝗗𝗶𝗯𝘂𝗮𝘁 𝗢𝗹𝗲𝗵 𝗕𝗼𝘁 𝗖𝗵𝗮𝗿𝗹𝗼𝘁𝘁𝗲 - 𝟬𝟴𝟱𝟭𝟱𝟵𝟮𝟱𝟴𝟴𝟯𝟬' // Watermark Sticker
 /* ~~~~~~~~~ MESSAGES ~~~~~~~~~ */
 global.mess = {
     done: '*Sukses*',
