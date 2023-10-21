@@ -4321,7 +4321,7 @@ case 'charlotte': {
   const apikey = 'jsjsbhwiwksnb' // Replace with your API key
   
   const query = encodeURIComponent(q)
-  const apiUrl = `https://api.lolhuman.xyz/api/simi?apikey=${lol}&text=${query}&badword=false`
+  const apiUrl = `https://api.lolhuman.xyz/api/simi?apikey=ekjsbsjsjs&text=${query}&badword=false`
 
   axios.get(apiUrl)
     .then(response => {
