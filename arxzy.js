@@ -2199,10 +2199,9 @@ Silahkan @${m.mentionedJid[0].split`@`[0]} Untuk Ketik terima/tolak`
                 afk.addAfkUser(m.sender, Date.now(), reason, _afk)
                 newReply(`*@${m.sender.split('@')[0]} Sedang AFK*\nDengan Alasan: ${reason}`)
                 break
-            case 'ask':
-            case 'openai': {
-                if (!isPremium) return newReply(mess.prem)
-                if (!full_args) return newReply('Format: *.openai Pertanyaan*')
+            case 'openai':
+            case 'carla': {
+                if (!full_args) return newReply('Iya?')
                 let d = await fetchJson(`https://xzn.wtf/api/openai?text=${full_args}&apikey=${xzn}`)                
                 await arxzy.sendMessage(from, {
                     text: d.result
@@ -4316,6 +4315,29 @@ AS: *${as}*
   break
 }
 case 'charlotte': {
+  if (!q) return newReply('*Name | Characteristics*\n\n.eris - Toxic\n.alora - Non-Toxic\n.carla - Berotak Senku\n\n*Powered By GPT-4 And SimSimi*')
+
+  const axios = require('axios')
+  const apikey = 'jsjsbhwiwksnb' // Replace with your API key
+  
+  const query = encodeURIComponent(q)
+  const apiUrl = `https://api.lolhuman.xyz/api/simi?apikey=${lol}&text=${query}&badword=false`
+
+  axios.get(apiUrl)
+    .then(response => {
+      const result = response.data.result
+      
+      // Reply with the generated response from the API
+      newReply(result)
+    })
+    .catch(error => {
+      console.error('Error:', error)
+      newReply('*Name | Characteristics*\n\n.eris - Toxic\n.alora - Non-Toxic\n.carla - Berotak Senku\n\n*Powered By GPT-4 And SimSimi*')
+    })
+
+  break
+}
+case 'alora': {
   if (!q) return newReply('Kenapa?')
 
   const axios = require('axios')
@@ -4338,8 +4360,8 @@ case 'charlotte': {
 
   break
 }
-case 'charlotte2': {
-  if (!q) return newReply('Kenapa?')
+case 'eris': {
+  if (!q) return newReply('Lah?')
 
   const axios = require('axios')
   const apikey = 'charlotte' // Replace with your API key
@@ -6488,7 +6510,9 @@ ${prefix}runtime
 ${prefix}donate
 ${prefix}owner
 ${prefix}charlotte
-${prefix}charlotte2
+${prefix}eris
+${prefix}alora
+${prefix}carla
 ${prefix}openai
 ${prefix}confess
 ${prefix}menfess${mono}
