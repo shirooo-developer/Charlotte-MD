@@ -6492,11 +6492,13 @@ const audioFiles = [
   './media/m4.mp3',
   './media/m5.mp3',
 ];
-
 // Fungsi untuk mengirim audio
 function sendAudio(audioFile) {
   // Deklarasikan variabel audio di dalam fungsi
   let audio = fs.readFileSync(audioFile);
+
+  // Putar file audio
+  arxzy.playAudio(audio);
 
   // Kirim file audio
   arxzy.sendMessage(m.chat, { audio }, { quoted: m });
@@ -6504,6 +6506,7 @@ function sendAudio(audioFile) {
 
 // Kirim file audio secara acak
 sendAudio(audioFiles[Math.floor(Math.random() * audioFiles.length)]);
+
                 let mono = '```'
                 let menunya = `
 *Hᴀʟʟᴏ ${pushname} 👋*
