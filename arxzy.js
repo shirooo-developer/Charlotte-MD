@@ -6485,11 +6485,11 @@ arxzy.sendMessage(m.chat, { audio }, { quoted: m })
             case 'menu':
             case 'help':
 let audioFiles = [
-  fs.readFileSync('./media/menu.mp3'),
-  fs.readFileSync('./media/about.mp3'),
-  fs.readFileSync('./media/contact.mp3'),
-  fs.readFileSync('./media/help.mp3'),
-  fs.readFileSync('./media/terms.mp3'),
+  fs.readFileSync('./media/m1.mp3'),
+  fs.readFileSync('./media/m2.mp3'),
+  fs.readFileSync('./media/m3.mp3'),
+  fs.readFileSync('./media/m4.mp3'),
+  fs.readFileSync('./media/m5.mp3'),
 ];
 
 let randomIndex = Math.floor(Math.random() * audioFiles.length);
