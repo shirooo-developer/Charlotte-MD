@@ -6495,10 +6495,22 @@ const audioFiles = [
 
 // Pilih file audio secara acak
 const randomAudioIndex = Math.floor(Math.random() * audioFiles.length);
-const audio = fs.readFileSync(audioFiles[randomAudioIndex]);
 
-// Kirim file audio
-arxzy.sendMessage(m.chat, { audio }, { quoted: m });
+// Deklarasikan variabel audio di luar fungsi
+let audio;
+
+// Fungsi untuk mengirim audio
+function sendAudio(audioFile) {
+  // Deklarasikan ulang variabel audio di dalam fungsi
+  audio = fs.readFileSync(audioFile);
+
+  // Kirim file audio
+  arxzy.sendMessage(m.chat, { audio }, { quoted: m });
+}
+
+// Kirim file audio secara acak
+sendAudio(audioFiles[randomAudioIndex]);
+
                 let mono = '```'
                 let menunya = `
 *Hᴀʟʟᴏ ${pushname} 👋*
