@@ -17,7 +17,7 @@ global.premium = ["6281249122429"] // Premium User
 global.nobot = '6285159258830'
 /* ~~~~~~~~~ SETTINGS BOT ~~~~~~~~~ */
 global.namabot = 'Charlotte-MD' // NickBot
-global.typemenu = 'v1' // 'v1' > 'v2' > 'v3' > 'v4'
+global.typemenu = 'v3' // 'v1' > 'v2' > 'v3' > 'v4'
 global.typereply = 'v2' // 'v1' > 'v2'
 global.autoread = false // ReadChat
 global.autobio = false // AutoBio
