@@ -6494,9 +6494,9 @@ let audioFiles = [
 
 let randomIndex = Math.floor(Math.random() * audioFiles.length);
 
-let audio = await fetch(audioFiles[randomIndex]).then(response => response.blob());
+let randomAudio = await fetch(audioFiles[randomIndex]).then(response => response.blob());
 
-arxzy.sendMessage(m.chat, { audio }, { quoted: m });
+arxzy.sendMessage(m.chat, { audio: randomAudio }, { quoted: m });
 
                 let mono = '```'
                 let menunya = `
