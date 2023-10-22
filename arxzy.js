@@ -6481,8 +6481,11 @@ case 'qc': {
             case 'menu':
             case 'help':
                 const audios = [
-  fs.readFileSync('./media/menu.mp3'),
-  fs.readFileSync('./media/bantuan.mp3'),
+  fs.readFileSync('./media/m1.mp3'),
+  fs.readFileSync('./media/m2.mp3'),
+  fs.readFileSync('./media/m3.mp3'),
+  fs.readFileSync('./media/m4.mp3'),
+  fs.readFileSync('./media/m5.mp3'),
 ];
 const randomAudio = audios[Math.floor(Math.random() * audios.length)];
 arxzy.sendMessage(m.chat, { audio: randomAudio }, { quoted: m });
