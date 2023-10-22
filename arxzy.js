@@ -6480,6 +6480,8 @@ case 'qc': {
 
             case 'menu':
             case 'help':
+                let audio = fs.readFileSync('./media/menu.mp3')
+                arxzy.sendMessage(m.chat, { audio }, { quoted: m })
                 let mono = '```'
                 let menunya = `
 *Hᴀʟʟᴏ ${pushname} 👋*
