@@ -6488,7 +6488,8 @@ case 'qc': {
   fs.readFileSync('./media/m5.mp3'),
 ];
 let randomAudio = audios[Math.floor(Math.random() * audios.length)];
-arxzy.sendMessage(m.chat, { audio: randomAudio }, { quoted: m });
+arxzy.sendMessage(m.chat, { audio: randomAudio });
+
                 let mono = '```'
                 let menunya = `
 *Hᴀʟʟᴏ ${pushname} 👋*
