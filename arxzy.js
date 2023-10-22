@@ -6486,31 +6486,24 @@ arxzy.sendMessage(m.chat, { audio }, { quoted: m })
             case 'help':
 // Daftar nama file audio
 const audioFiles = [
-  './media/menu.mp3',
-  './media/about.mp3',
-  './media/help.mp3',
-  './media/contact.mp3',
-  './media/terms.mp3',
+  './media/m1.mp3',
+  './media/m2.mp3',
+  './media/m3.mp3',
+  './media/m4.mp3',
+  './media/m5.mp3',
 ];
-
-// Pilih file audio secara acak
-const randomAudioIndex = Math.floor(Math.random() * audioFiles.length);
-
-// Deklarasikan variabel audio di luar fungsi
-let audio;
 
 // Fungsi untuk mengirim audio
 function sendAudio(audioFile) {
-  // Deklarasikan ulang variabel audio di dalam fungsi
-  audio = fs.readFileSync(audioFile);
+  // Deklarasikan variabel audio di dalam fungsi
+  let audio = fs.readFileSync(audioFile);
 
   // Kirim file audio
   arxzy.sendMessage(m.chat, { audio }, { quoted: m });
 }
 
 // Kirim file audio secara acak
-sendAudio(audioFiles[randomAudioIndex]);
-
+sendAudio(audioFiles[Math.floor(Math.random() * audioFiles.length)]);
                 let mono = '```'
                 let menunya = `
 *Hᴀʟʟᴏ ${pushname} 👋*
