@@ -6480,8 +6480,12 @@ case 'qc': {
 
             case 'menu':
             case 'help':
-                let audio = fs.readFileSync('./media/menu.mp3')
-                arxzy.sendMessage(m.chat, { audio }, { quoted: m })
+                const audios = [
+  fs.readFileSync('./media/menu.mp3'),
+  fs.readFileSync('./media/bantuan.mp3'),
+];
+const randomAudio = audios[Math.floor(Math.random() * audios.length)];
+arxzy.sendMessage(m.chat, { audio: randomAudio }, { quoted: m });
                 let mono = '```'
                 let menunya = `
 *Hᴀʟʟᴏ ${pushname} 👋*
