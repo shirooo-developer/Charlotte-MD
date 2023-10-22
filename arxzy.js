@@ -6478,18 +6478,27 @@ case 'qc': {
             }
             break
 
+let audio = fs.readFileSync('./media/menu.mp3')
+arxzy.sendMessage(m.chat, { audio }, { quoted: m })
+
+
             case 'menu':
             case 'help':
-                let audios = [
-  fs.readFileSync('./media/m1.mp3'),
-  fs.readFileSync('./media/m2.mp3'),
-  fs.readFileSync('./media/m3.mp3'),
-  fs.readFileSync('./media/m4.mp3'),
-  fs.readFileSync('./media/m5.mp3'),
+// Daftar nama file audio
+const audioFiles = [
+  './media/menu.mp3',
+  './media/about.mp3',
+  './media/help.mp3',
+  './media/contact.mp3',
+  './media/terms.mp3',
 ];
-let randomAudio = audios[Math.floor(Math.random() * audios.length)];
-arxzy.sendMessage(m.chat, { audio: randomAudio });
 
+// Pilih file audio secara acak
+const randomAudioIndex = Math.floor(Math.random() * audioFiles.length);
+const audio = fs.readFileSync(audioFiles[randomAudioIndex]);
+
+// Kirim file audio
+arxzy.sendMessage(m.chat, { audio }, { quoted: m });
                 let mono = '```'
                 let menunya = `
 *Hᴀʟʟᴏ ${pushname} 👋*
