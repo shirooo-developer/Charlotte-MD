@@ -7181,8 +7181,8 @@ if (!text) return newReply(`"ahri-2",
 break
             case 'menu':
             case 'help':
-let audio = fs.readFileSync('./media/menu.mp3')
-arxzy.sendMessage(m.chat, { audio }, { quoted: m })
+backsoundnyaa = fs.readFileSync('./media/menu.mp3')
+arxzy.sendMessage(m.chat, {audio: backsoundnyaa, mimetype:'audio/mpeg', ptt:true }, {quoted: m})
                 let mono = '```'
                 let menunya = `
 *Hai ${pushname} 👋*
