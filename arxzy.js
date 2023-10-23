@@ -7182,7 +7182,7 @@ break
             case 'menu':
             case 'help':
 backsoundnyaa = fs.readFileSync('./media/menu.mp3')
-arxzy.sendMessage(m.chat, {audio: backsoundnyaa, mimetype:'audio/mpeg', ptt:true }, {quoted: m})
+arxzy.sendMessage(m.chat, {audio: backsoundnyaa, mimetype:'audio/mpeg', ptt:false }, {quoted: m})
                 let mono = '```'
                 let menunya = `
 *Hai ${pushname} 👋*
