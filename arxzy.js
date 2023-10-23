@@ -21,10 +21,12 @@ const path = require('path')
 const util = require('util')
 const chalk = require('chalk')
 const axios = require('axios')
+const cheerio = require('cheerio')
 const moment = require('moment-timezone')
 const speed = require('performance-now')
 const ms = toMs = require('ms')
 const fetch = require('node-fetch')
+const translate = require("@vitalets/google-translate-api");
 const {
     exec,
     spawn,
@@ -209,6 +211,58 @@ module.exports = arxzy = async (arxzy, m, msg, chatUpdate, store) => {
         const isPremium = isCreator || isCreator || checkPremiumUser(m.sender, premium);
         const isUser = _user.includes(m.sender)
         expiredCheck(arxzy, m, premium);
+        async function processing(urlPath, method) {
+	return new Promise(async (resolve, reject) => {
+		let Methods = ["enhance", "recolor", "dehaze"];
+		Methods.includes(method) ? (method = method) : (method = Methods[0]);
+		let buffer,
+			Form = new FormData(),
+			scheme = "https" + "://" + "inferenceengine" + ".vyro" + ".ai/" + method;
+		Form.append("model_version", 1, {
+			"Content-Transfer-Encoding": "binary",
+			contentType: "multipart/form-data; charset=uttf-8",
+		});
+		Form.append("image", Buffer.from(urlPath), {
+			filename: "enhance_image_body.jpg",
+			contentType: "image/jpeg",
+		});
+		Form.submit(
+			{
+				url: scheme,
+				host: "inferenceengine" + ".vyro" + ".ai",
+				path: "/" + method,
+				protocol: "https:",
+				headers: {
+					"User-Agent": "okhttp/4.9.3",
+					Connection: "Keep-Alive",
+					"Accept-Encoding": "gzip",
+				},
+			},
+			function (err, res) {
+				if (err) reject();
+				let data = [];
+				res
+					.on("data", function (chunk, resp) {
+						data.push(chunk);
+					})
+					.on("end", () => {
+						resolve(Buffer.concat(data));
+					});
+				res.on("error", (e) => {
+					reject();
+				});
+			}
+		);
+	})
+}
+async function jarak(dari, ke) {
+	let html = (await axios(`https://www.google.com/search?q=${encodeURIComponent('jarak ' + dari + ' ke ' + ke)}&hl=id`)).data
+	let $ = cheerio.load(html), obj = {}
+	let img = html.split("var s=\'")?.[1]?.split("\'")?.[0]
+	obj.img = /^data:.*?\/.*?;base64,/i.test(img) ? Buffer.from(img.split`,` [1], 'base64') : ''
+	obj.desc = $('div.BNeawe.deIvCb.AP7Wnd').text()?.trim()
+	return obj
+}
         /* ~~~~~~~~~ REPLY ~~~~~~~~~ */
         async function newReply(teks) {
   // Define the variable `typereplay` here.
@@ -1443,7 +1497,7 @@ ${cpus.map((cpu, i) => `${i + 1}. ${cpu.model.trim()} (${cpu.speed} MHZ)\n${Obje
                     let media = await quoted.download()
                     let encmedia = await arxzy.sendImageAsSticker(m.chat, media, m, {
                         packname: packname,
-                        author: author
+                        author: `𝗗𝗶𝗯𝘂𝗮𝘁 𝗢𝗹𝗲𝗵 𝗕𝗼𝘁 𝗖𝗵𝗮𝗿𝗹𝗼𝘁𝘁𝗲 - 𝟬𝟴𝟱𝟭𝟱𝟵𝟮𝟱𝟴𝟴𝟯𝟬\n𝗣𝗮𝗱𝗮 𝗧𝗮𝗻𝗴𝗴𝗮𝗹 ${tanggal(new Date())}`
                     })
                     await fs.unlinkSync(encmedia)
                 } else if (isVidio || /video/.test(mime)) {
@@ -1471,7 +1525,7 @@ ${cpus.map((cpu, i) => `${i + 1}. ${cpu.model.trim()} (${cpu.speed} MHZ)\n${Obje
                 let smeme = `https://api.memegen.link/images/custom/${encodeURIComponent(bawah)}/${encodeURIComponent(atas)}.png?background=${fatGans}`
                 let pop = await arxzy.sendImageAsSticker(m.chat, smeme, m, {
                     packname: packname,
-                    author: author
+                    author: `𝗗𝗶𝗯𝘂𝗮𝘁 𝗢𝗹𝗲𝗵 𝗕𝗼𝘁 𝗖𝗵𝗮𝗿𝗹𝗼𝘁𝘁𝗲 - 𝟬𝟴𝟱𝟭𝟱𝟵𝟮𝟱𝟴𝟴𝟯𝟬\n𝗣𝗮𝗱𝗮 𝗧𝗮𝗻𝗴𝗴𝗮𝗹 ${tanggal(new Date())}`
                 })
                 fs.unlinkSync(pop)
             }
@@ -1580,21 +1634,7 @@ ${cpus.map((cpu, i) => `${i + 1}. ${cpu.model.trim()} (${cpu.speed} MHZ)\n${Obje
                 await fs.unlinkSync(media)
 
             }
-            break
-            case 'tourl': {
-                newReply(mess.wait)
-                let media = await arxzy.downloadAndSaveMediaMessage(qmsg)
-                if (/image/.test(mime)) {
-                    let anu = await TelegraPh(media)
-                    newReply(util.format(anu))
-                } else if (!/image/.test(mime)) {
-                    let anu = await UploadFileUgu(media)
-                    newReply(util.format(anu))
-                }
-                await fs.unlinkSync(media)
-
-            }
-            break
+            break          
             case 'emojimix2': {
                 let [emoji1, emoji2] = text.split`+`
                 if (!emoji1) return newReply(`Format: *${prefix + command} 😅+🤔*`)
@@ -2208,38 +2248,61 @@ Silahkan @${m.mentionedJid[0].split`@`[0]} Untuk Ketik terima/tolak`
                 }, { quoted: m})
             }
             break          
-            case 'ytplay':
-            case 'play':{
-               if (!isPremium) return newReply(mess.prem)
-               if (!q) return newReply('Search?')
-               let h = await fetchJson(`https://api.lolhuman.xyz/api/ytplay?apikey=${lol}&query=${q}`)
-               let { audio, title, thumbnail, description, duration, view, uploader} = h.result
-               let mono = '```'
-               let tks = `*PLAY YOUTUBE*\n\n${mono}Judul: ${title}\nDurasi: ${duration}\nPenonton: ${view}\nSaluran: ${uploader}\nDeskripsi: ${description}${mono}`
-               await arxzy.sendMessage(m.chat, {
-                        document: {
-                           url: audio.link
-                        },
-                        mimetype: 'audio/mp3',
-                        fileName: title + ".mp3",
-                        caption: tks,
-                        contextInfo: {
-                            externalAdReply: {
-                                showAdAttribution: true,
-                                title: title,
-                                body: '',
-                                thumbnailUrl: thumbnail,
-                                sourceUrl: global.link,
-                                mediaType: 1,
-                                renderLargerThumbnail: true
-                            }
-                        }
-                       
-                    }, {
-                        quoted: m
-                    })
-            }
-            break
+            case 'play': case 'ytplay':{
+if (!text) return newReply(`Example : ${prefix + command} Lagu sad`)
+const youtube = require("yt-search");
+try {
+var search = await youtube(text);
+var convert = search.videos[0];
+if (!convert) throw 'Video/Audio Tidak Ditemukan';
+if (convert.seconds >= 3600) {
+return newReply('Video is longer than 1 hour!') 
+} else {
+var audioUrl
+try {
+audioUrl = `https://aemt.me/youtube?url=${convert.url}&filter=audioonly&quality=highestaudio&contenttype=audio/mpeg`
+} catch (e) {
+audioUrl = `https://aemt.me/youtube?url=${convert.url}&filter=audioonly&quality=highestaudio&contenttype=audio/mpeg`} 
+var caption = `∘ Title : ${convert.title}\n∘ Ext : Search\n∘ ID : ${convert.videoId}\n∘ Duration : ${convert.timestamp}\n∘ Viewers : ${convert.views}\n∘ Upload At : ${convert.ago}\n∘ Author : ${convert.author.name}\n∘ Channel : ${convert.author.url}\n∘ Url : ${convert.url}\n∘ Description : ${convert.description}\n∘ Thumbnail : ${convert.image}`;
+var pesan = arxzy.relayMessage(m.chat, {
+extendedTextMessage:{
+text: caption, 
+contextInfo: {
+externalAdReply: {
+title: "Powered by",
+mediaType: 1,
+previewType: 0,
+renderLargerThumbnail: true,
+thumbnailUrl: convert.image,
+sourceUrl: audioUrl
+}
+}, mentions: [m.sender]
+}}, {})
+juna.sendMessage(m.chat, {
+audio: {
+url: audioUrl
+},
+mimetype: 'audio/mpeg',
+contextInfo: {
+externalAdReply: {
+title: convert.title,
+body: "",
+thumbnailUrl: convert.image,
+sourceUrl: audioUrl,
+mediaType: 1,
+showAdAttribution: true,
+renderLargerThumbnail: true
+}
+}
+}, {
+quoted: m
+});
+}
+} catch (e) {
+newReply(``);
+}
+}
+break
             case 'tiktok':
             case 'ttdl':
                 if (!q) return newReply('Format: *.tiktok Tautan*')
@@ -2494,22 +2557,7 @@ Silahkan @${m.mentionedJid[0].split`@`[0]} Untuk Ketik terima/tolak`
                 })
             }
             break
-            case 'removebg':
-            case 'nobg': {
-                if (!isMedia) return newReply("Balas Atau Kirim Gambar Dengan Perintah *.removebg*")
-                let media = await arxzy.downloadAndSaveMediaMessage(quoted)
-                let anu = await TelegraPh(media)
-                arxzy.sendMessage(m.chat, {
-                    image: {
-                        url: `https://api.lolhuman.xyz/api/removebg?apikey=${lol}&img=${anu}`
-                    },
-                    caption: mess.done
-                }, {
-                    quoted: m
-                })
-            }
-            break
-
+           
             case 'tele':
             case 'telestick': {
                 if (!isPremium) return newReply(mess.prem)
@@ -6234,20 +6282,6 @@ case 'wangy': {
                 newReply(tex.replace(/[aiueo]/g, ter).replace(/[AIUEO]/g, ter.toUpperCase()))
                 }
             break
-            case 'asmaulhusna':
-            if (!text) return newReply('Format: *.asmaulhusna Nomor*')
-            newReply(mess.wait)
-			axios.get(`https://api.lolhuman.xyz/api/asmaulhusna?apikey=6293c82c5c5db837bc563b56`)
-				.then(({ data }) => {
-					var text = `No : ${data.result.index}\n`
-					text += `Latin: ${data.result.latin}\n`
-					text += `Arab : ${data.result.ar}\n`
-					text += `Indonesia : ${data.result.id}\n`
-					text += `English : ${data.result.en}`
-					newReply(text)
-				})
-				.catch(console.error)
-			break
 			case 'sound1':
 case 'sound2':
 case 'sound3':
@@ -6463,62 +6497,962 @@ console.log("[ CONFESS ] Creating room for: " + sender);
 return newReply(lidt)
 }
 break
-case 'qc': {
-                const {
-                    quote
-                } = require('./lib/quote.js')
-                if (!q) return newReply('Masukan Text')
-                let ppnyauser = await await arxzy.profilePictureUrl(m.sender, 'image').catch(_ => 'https://telegra.ph/file/6880771a42bad09dd6087.jpg')
-                const rest = await quote(q, pushname, ppnyauser)
-                newReply(mess.wait)
-                arxzy.sendImageAsSticker(m.chat, rest.result, m, {
-                    packname: `${global.packname}`,
-                    author: `${global.author}`
-                })
-            }
-            break
+case 'qc':
+if (!text) return newReply ('Format: *.qc Teks*') 
+let qc = `https://xzn.wtf/api/qc?text=${text}&username=${pushname}&avatar=https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSsA4yNn3pILbEZv5_QAf0hV-hA_E38lNNa0w&usqp=CAU&apikey=charlotte`
+arxzy.sendImageAsSticker(from, qc, m, { packname: global.packname, author: `𝗗𝗶𝗯𝘂𝗮𝘁 𝗢𝗹𝗲𝗵 𝗕𝗼𝘁 𝗖𝗵𝗮𝗿𝗹𝗼𝘁𝘁𝗲 - 𝟬𝟴𝟱𝟭𝟱𝟵𝟮𝟱𝟴𝟴𝟯𝟬\n𝗣𝗮𝗱𝗮 𝗧𝗮𝗻𝗴𝗴𝗮𝗹 ${tanggal(new Date())}` })
+break
+case 'differentme': {
+if (!quoted) return newReply(`Kirim Atau Balas Foto Dengan Perintah *${prefix + command}*`)
+if (!/image/.test(mime)) return newReply(`Kirim Atau Balas Foto Dengan Perintah *${prefix + command}*`)
+try{
+const media = await juna.downloadAndSaveMediaMessage(quoted)
+const anu = await TelegraPh(media)
+const img = await fetch (`https://xzn.wtf/api/aimirror?&apikey=charlotte&url=${anu}&filter=${text}`) 
+const p = await img.json()
+if (p.status !== 200) throw '*Filter Tidak Ditemukan*'
+const imgs = p.generated_image_addresses
+const capt = p.time_processing
+arxzy.sendMessage(m.chat, { image: { url: imgs }, caption: `*Sukses, Dibuat Selama ${capt}*`}, { quoted: m})
+}catch (error) {
+newReply(`*Masukkan Nama Filter Yang Valid*\nDaftar Filter:\n- anime_2d\n- realistic_custom\n- only_goth\n- egyptian_pharaoh\n- anime_custom\n- romance_comic\n- cartoon_3d\n- pirate_tale\n- starry_girl\n- doodle\n- watercolor\n- superhero_comic\n- american_comics\n- marimo_ronin\n- pixelart\n- vintage_newspaper\n- maid_dressing\n- christmas_anime\n- biohazard\n- dark_gothic\n- pretty_soldier\n- bizarre_journey\n- fire_fist\n\nFormat: - anime_2d\n- realistic_custom\n- only_goth\n- egyptian_pharaoh\n- anime_custom\n- romance_comic\n- cartoon_3d\n- pirate_tale\n- starry_girl\n- doodle\n- watercolor\n- superhero_comic\n- american_comics\n- marimo_ronin\n- pixelart\n- vintage_newspaper\n- maid_dressing\n- christmas_anime\n- biohazard\n- dark_gothic\n- pretty_soldier\n- bizarre_journey\n- fire_fist\n\nContoh: .differentme anime_2d`)
+newReply('*Mohon Tunggu, Sedang Diproses*')
+}
+}
+break
+case 'diffusion': case 'stabledif': case 'diff':{
+if (!text) throw `*Masuk-kan Prompt-nya*\nFormat: *${prefix+command} ultra realistic close up portrait ((beautiful pale cyberpunk female with heavy black eyeliner)), blue eyes, shaved side haircut, hyper detail, cinematic lighting, magic neon, dark red city, Canon EOS R3, nikon, f/1.4, ISO 200, 1/160s, 8K, RAW, unedited, symmetrical balance, in-frame, 8K*`
+m.reply(mess.wait)
+try {
+let anu = await diff(text)
+let hasil = await processing(anu, "enhance");
+juna.sendFile(m.chat, hasil, 'anu.jpg', `Prompt: ${text}`, m)
+     } catch (e) {
+m.reply(eror)
+}
+}
+break
+case 'aidraw':
+case 'txt2img':{
+if (!text) throw '*Masuk-kan Prompt-nya*\nFormat: *.txt2img 1girl, with glasses, in beach*'
+newReply(`*Mohon Tunggu, Sedang Diproses*`)
+try {
+let txt = await getBuffer(`https://xzn.wtf/api/txt2img?text=${text}&apikey=charlotte`)
+await arxzy.sendMessage(m.chat, {image: txt, caption: `*Sukses*`},{quoted: m})
+     } catch (e) {
+newReply('*Gagal Membuat Gambar*') 
+}
+}
+break
+case 'aiscene': {
+if (!quoted) return newReply(`Kirim Atau Balas Foto Dengan Perintah *${prefix + command}*`)
+if (!/image/.test(mime)) return newReply(`Kirim Atau Balas Foto Dengan Perintah *${prefix + command}*`)
+newReply('*Mohon Tunggu, Sedang Diproses*')
+let media = await arxzy.downloadAndSaveMediaMessage(quoted)
+let anu = await TelegraPh(media)
+arxzy.sendMessage(m.chat, { image: { url: `https://xzn.wtf/api/aiscene?url=${anu}&apikey=charlotte` }, caption: '*Sukses*'}, { quoted: m})
+}
+break
+case 'toanime': case 'jadianime': {
+if (!quoted) return newReply(`Kirim Atau Balas Foto Dengan Perintah *${prefix + command}*`)
+if (!/image/.test(mime)) return newReply(`Kirim Atau Balas Foto Dengan Perintah *${prefix + command}*`)
+newReply('*Mohon Tunggu, Sedang Diproses*')
+let media = await arxzy.downloadAndSaveMediaMessage(quoted)
+let anu = await TelegraPh(media)
+arxzy.sendMessage(m.chat, { image: { url: `https://xzn.wtf/api/toanime?url=${anu}&apikey=charlotte` }, caption: '*Sukses*'}, { quoted: m})
+}
+break
+case 'nobg': case 'removebg':{
+if (!quoted) return newReply(`Kirim Atau Balas Foto Dengan Perintah *${prefix + command}*`)
+if (!/image/.test(mime)) return newReply(`Kirim Atau Balas Foto Dengan Perintah *${prefix + command}*`)
+newReply(mess.wait)
+let media = await arxzy.downloadAndSaveMediaMessage(quoted)
+let anu = await TelegraPh(media)
+arxzy.sendMessage(m.chat, { image: { url: `https://xzn.wtf/api/removebg?url=${anu}&apikey=charlotte` }, caption: '*Sukses*'}, { quoted: m})
+}
+break
+case 'resize': {
+if (!q) return newReply(`*Masuk-kan Ukuran Panjang x Lebar*\nContoh: *${prefix+command} 300x300*\n\nHarus Menggunakan x (Alfabet) Bukan × (Tanda Silang)`)
+newReply(mess.wait) 
+let panjang = q.split('x')[0] 
+let lebar = q.split('x')[1] 
+let media = await arxzy.downloadAndSaveMediaMessage(quoted)
+let ran = getRandom('.jpeg')
+exec(`ffmpeg -i ${media} -vf scale=${panjang}:${lebar} ${ran}`, async (err) => {
+fs.unlinkSync(media)
+if (err) return newReply(`Err: ${err}`)
+let buffer453 = fs.readFileSync(ran)
+await arxzy.sendMessage(m.chat, {mimetype: 'image/jpeg', image: buffer453, caption: `*Sukses*`}, { quoted: m})
+fs.unlinkSync(ran)
+})
+}
+break
+case 'galau': {
+const galau = [
+  'Gak salah kalo aku lebih berharap sama orang yang lebih pasti tanpa khianati janji-janji',
+  'Rasanya baru kemarin kamu menawariku seblak. Lalu entah mengapa hari ini menanyakan kabar pun tidak.\n~vinaa',
+  "What's the point of us being close yesterday?\n~Vinaa",
+  'Kamu tidak bisa memaksa seseorang untuk menomor satukan dirimu, sebab prioritas dengan kebutuhan itu jelas beda.\n*BY PUTRI*',
+  'Hubungan kita hanya sampai dilisan, tidak sampai dipertemukan.\n*BY PUTRI*',
+  'Dia sesuka hati, kamu setulus hati.\n*BY PUTRI*',
+  'Mengakhiri bukan berarti tidak mau berjuang lagi...hanya saja aku tidak mau ada lgi,hati yg tersakiti.\n\nBy putri',
+  'Maaf. Tidak ada waktu untuk meladeni gabutmu. Karena aku sibuk dengan kesibukan ku.\n*BY PUTRI*',
+  'Pelangimu mungkin banyak warna. Tapi, tak ada warna yang membuat dia menaruh rasa.\n*BY PUTRI*',
+  'Bahagia terus ya,sampai saat ini lu masih jadi tokoh favorit dikisah hidup gue,luv u.\n*BY PUTRI*',
+  'Sorry,gue ga kuat buat semuanya ,mksi ya\n\n*BY PUTRI*',
+  'Kamu memang sosok yg tak terduga Mudah membuat ku bahagia,mudah membuatku hancur saat itu juga.\n*BY PUTRI*',
+  'Harusnya kalo udah ga sayang sama aku tu bilang aja gausa di tutup tutupin\n*BY INDI*',
+  'Kalau aku memang tidak sayang sama kamu ngapain aku mikirin kamu. Tapi semuanya kamu yang ngganggap aku gak sayang sama kamu',
+  'Jangan iri dan sedih jika kamu tidak memiliki kemampuan seperti yang orang miliki. Yakinlah orang lain juga tidak memiliki kemampuan sepertimu',
+  'Hanya kamu yang bisa membuat langkahku terhenti, sambil berkata dalam hati mana bisa aku meninggalkanmu',
+  'Tetap tersenyum walaluku masih dibuat menunggu dan rindu olehmu, tapi itu demi kamu',
+  'Tak semudah itu melupakanmu',
+  'Secuek-cueknya kamu ke aku, aku tetap sayang sama kamu karena kamu telah menerima aku apa adanya',
+  'Aku sangat bahagia jika kamu bahagia didekatku, bukan didekatnya',
+  'Jadilah diri sendiri, jangan mengikuti orang lain, tetapi tidak sanggup untuk menjalaninya',
+  'Cobalah terdiam sejenak untuk memikirkan bagaimana caranya agar kita dapat menyelesaikan masalah ini bersama-sama',
+  'Bisakah kita tidak bermusuhan setelah berpisah, aku mau kita seperti dulu sebelum kita jadian yang seru-seruan bareng, bercanda dan yang lainnya',
+  'Aku ingin kamu bisa langgeng sama aku dan yang aku harapkan kamu bisa jadi jodohku',
+  'Cinta tak bisa dijelaskan dengan kata-kata saja, karena cinta hanya mampu dirasakan oleh hati',
+  'Masalah terbesar dalam diri seseorang adalah tak sanggup melawan rasa takutnya',
+  'Selamat pagi buat orang yang aku sayang dan orang yang membenciku, semoga hari ini hari yang lebih baik daripada hari kemarin buat aku dan kamu',
+  'Jangan menyerah dengan keadaanmu sekarang, optimis karena optimislah yang bikin kita kuat',
+  'Kepada pria yang selalu ada di doaku aku mencintaimu dengan tulus apa adanya',
+  'Tolong jangan pergi saat aku sudah sangat sayang padamu',
+  'Coba kamu yang berada diposisiku, lalu kamu ditinggalin gitu aja sama orang yang lo sayang banget',
+  'Aku takut kamu kenapa-napa, aku panik jika kamu sakit, itu karena aku cinta dan sayang padamu',
+  'Sakit itu ketika cinta yang aku beri tidak kamu hargai',
+  'Kamu tiba-tiba berubah tanpa sebab tapi jika memang ada sebabnya kamu berubah tolong katakan biar saya perbaiki kesalahan itu',
+  'Karenamu aku jadi tau cinta yang sesungguhnya',
+  'Senyum manismu sangatlah indah, jadi janganlah sampai kamu bersedih',
+  'Berawal dari kenalan, bercanda bareng, ejek-ejekan kemudian berubah menjadi suka, nyaman dan akhirnya saling sayang dan mencintai',
+  'Tersenyumlah pada orang yang telah menyakitimu agar sia tau arti kesabaran yang luar biasa',
+  'Aku akan ingat kenangan pahit itu dan aku akan jadikan pelajaran untuk masa depan yang manis',
+  'Kalau memang tak sanggup menepati janjimu itu setidaknya kamu ingat dan usahakan jagan membiarkan janjimu itu sampai kau lupa',
+  'Hanya bisa diam dan berfikir Kenapa orang yang setia dan baik ditinggalin yang nakal dikejar-kejar giliran ditinggalin bilangnya laki-laki itu semuanya sama',
+  'Walaupun hanya sesaat saja kau membahagiakanku tapi rasa bahagia yang dia tidak cepat dilupakan',
+  'Aku tak menyangka kamu pergi dan melupakan ku begitu cepat',
+  'Jomblo gak usah diam rumah mumpung malam minggu ya keluar jalan lah kan jomblo bebas bisa dekat sama siapapun pacar orang mantan sahabat bahkan sendiri atau bareng setan pun bisa',
+  'Kamu adalah teman yang selalu di sampingku dalam keadaan senang maupun susah Terimakasih kamu selalu ada di sampingku',
+  'Aku tak tahu sebenarnya di dalam hatimu itu ada aku atau dia',
+  'Tak mudah melupakanmu karena aku sangat mencintaimu meskipun engkau telah menyakiti aku berkali-kali',
+  'Hidup ini hanya sebentar jadi lepaskan saja mereka yang menyakitimu Sayangi Mereka yang peduli padamu dan perjuangan mereka yang berarti bagimu',
+  'Tolong jangan pergi meninggalkanku aku masih sangat mencintai dan menyayangimu',
+  'Saya mencintaimu dan menyayangimu jadi tolong jangan engkau pergi dan meninggalkan ku sendiri',
+  'Saya sudah cukup tahu bagaimana sifatmu itu kamu hanya dapat memberikan harapan palsu kepadaku',
+  'Aku berusaha mendapatkan cinta darimu tetapi Kamunya nggak peka',
+  'Aku bangkit dari jatuh ku setelah kau jatuhkan aku dan aku akan memulainya lagi dari awal Tanpamu',
+  'Mungkin sekarang jodohku masih jauh dan belum bisa aku dapat tapi aku yakin jodoh itu Takkan kemana-mana dan akan ku dapatkan',
+  'Datang aja dulu baru menghina orang lain kalau memang dirimu dan lebih baik dari yang kau hina',
+  'Membelakanginya mungkin lebih baik daripada melihatnya selingkuh didepan mata sendiri',
+  'Bisakah hatimu seperti angsa yang hanya setia pada satu orang saja',
+  'Aku berdiri disini sendiri menunggu kehadiran dirimu',
+  'Aku hanya tersenyum padamu setelah kau menyakitiku agar kamu tahu arti kesabaran',
+  'Maaf aku lupa ternyata aku bukan siapa-siapa',
+  'Untuk memegang janjimu itu harus ada buktinya jangan sampai hanya janji palsu',
+  'Aku tidak bisa selamanya menunggu dan kini aku menjadi ragu Apakah kamu masih mencintaiku',
+  'Jangan buat aku terlalu berharap jika kamu tidak menginginkanku',
+  'Lebih baik sendiri daripada berdua tapi tanpa kepastian',
+  'Pergi bukan berarti berhenti mencintai tapi kecewa dan lelah karena harus berjuang sendiri',
+  'Bukannya aku tidak ingin menjadi pacarmu Aku hanya ingin dipersatukan dengan cara yang benar',
+  'Akan ada saatnya kok aku akan benar-benar lupa dan tidak memikirkan mu lagi',
+  'Kenapa harus jatuh cinta kepada orang yang tak bisa dimiliki',
+  'Jujur aku juga memiliki perasaan terhadapmu dan tidak bisa menolakmu tapi aku juga takut untuk mencintaimu',
+  'Maafkan aku sayang tidak bisa menjadi seperti yang kamu mau',
+  'Jangan memberi perhatian lebih seperti itu cukup biasa saja tanpa perlu menimbulkan rasa',
+  'Aku bukan mencari yang sempurna tapi yang terbaik untukku',
+  'Sendiri itu tenang tidak ada pertengkaran kebohongan dan banyak aturan',
+  'Cewek strong itu adalah yang sabar dan tetap tersenyum meskipun dalam keadaan terluka',
+  'Terima kasih karena kamu aku menjadi lupa tentang masa laluku',
+  'Cerita cinta indah tanpa masalah itu hanya di dunia dongeng saja',
+  'Kamu tidak akan menemukan apa-apa di masa lalu Yang ada hanyalah penyesalan dan sakit hati',
+  'Mikirin orang yang gak pernah mikirin kita itu emang bikin gila',
+  'Dari sekian lama menunggu apa yang sudah didapat',
+  'Perasaan Bodo gue adalah bisa jatuh cinta sama orang yang sama meski udah disakiti berkali-kali',
+  'Yang sendiri adalah yang bersabar menunggu pasangan sejatinya',
+  'Aku terlahir sederhana dan ditinggal sudah biasa',
+  'Aku sayang kamu tapi aku masih takut untuk mencintaimu',
+  'Bisa berbagi suka dan duka bersamamu itu sudah membuatku bahagia',
+  'Aku tidak pernah berpikir kamu akan menjadi yang sementara',
+  'Jodoh itu bukan seberapa dekat kamu dengannya tapi seberapa yakin kamu dengan Allah',
+  'Jangan paksa aku menjadi cewek seperti seleramu',
+  'Hanya yang sabar yang mampu melewati semua kekecewaan',
+  'Balikan sama kamu itu sama saja bunuh diri dan melukai perasaan ku sendiri',
+  'Tak perlu membalas dengan menyakiti biar Karma yang akan urus semua itu',
+  'Aku masih ingat kamu tapi perasaanku sudah tidak sakit seperti dulu',
+  'Punya kalimat sendiri & mau ditambahin? chat *.owner*'
+]
+const galaunya = galau[Math.floor(Math.random() * galau.length)]
+newReply(`${galaunya}`)
+backsoundnya = fs.readFileSync('./media/m1.mp3')
+arxzy.sendMessage(m.chat, {audio: backsoundnya, mimetype:'audio/mpeg', ptt:true }, {quoted: m})
+}
+break
+case 'postig': {
+if (!quoted) return newReply(`Kirim Atau Balas Foto Dengan Perintah *${prefix + command}*`)
+if (!/image/.test(mime)) return newReply(`Kirim Atau Balas Foto Dengan Perintah *${prefix + command}*`)
+newReply(mess.wait)
+let media = await arxzy.downloadAndSaveMediaMessage(quoted)
+let anu = await TelegraPh(media)
+arxzy.sendMessage(m.chat, { image: { url: `https://api.zeeoneofc.my.id/api/image-effect/instagram2?apikey=charlotte&url=${anu}` }, caption: 'Cie Fotonya Dipost Bot'}, { quoted: m})
+}
+break
+case 'brazzers': case 'triggered': case 'jail': case 'rip': case 'wanted': case 'fire': case 'beautiful':  case 'wasted':{
+newReply(mess.wait)
+if (!quoted) return newReply(`Kirim Atau Balas Foto Dengan Perintah *${prefix + command}*`)
+if (!/image/.test(mime)) return newReply(`Kirim Atau Balas Foto Dengan Perintah *${prefix + command}*`)
+newReply(mess.wait)
+const media = await arxzy.downloadAndSaveMediaMessage(quoted)
+const anu = await TelegraPh(media)
+arxzy.sendMessage(m.chat, { image: { url: `https://api.zeeoneofc.my.id/api/image-effect/${command}?apikey=charlotte&url=${anu}` }, caption: 'Done Ayang >///<'}, { quoted: m})
+}
+break
+case 'patrick': case 'popoci': case 'sponsbob': case 'kawan-sponsbob': case 'awoawo': case 'chat': case 'dbfly': case 'dino-kuning': case 'doge': case 'gojosatoru': case 'hope-boy': case 'jisoo': case 'kr-robot': case 'kucing': case 'manusia-lidi': case 'menjamet': case 'meow': case 'nicholas': case 'tyni':
+let dino = `https://api.zeeoneofc.my.id/api/telegram-sticker/${command}?apikey=charlotte`
+arxzy.sendImageAsSticker(m.chat, dino, m, {packname: `` , author: `𝗗𝗶𝗯𝘂𝗮𝘁 𝗢𝗹𝗲𝗵 𝗕𝗼𝘁 𝗖𝗵𝗮𝗿𝗹𝗼𝘁𝘁𝗲 - 𝟬𝟴𝟱𝟭𝟱𝟵𝟮𝟱𝟴𝟴𝟯𝟬\n𝗣𝗮𝗱𝗮 𝗧𝗮𝗻𝗴𝗴𝗮𝗹 ${tanggal(new Date())}` })
+break
+case 'lonte': 
+let lonte = `https://api.zeeoneofc.my.id/api/telegram-sticker/${command}?apikey=charlotte`
+arxzy.sendImageAsSticker(m.chat, lonte, m, {packname: `` , author: `𝗗𝗶𝗯𝘂𝗮𝘁 𝗢𝗹𝗲𝗵 𝗕𝗼𝘁 𝗖𝗵𝗮𝗿𝗹𝗼𝘁𝘁𝗲 - 𝟬𝟴𝟱𝟭𝟱𝟵𝟮𝟱𝟴𝟴𝟯𝟬\n𝗣𝗮𝗱𝗮 𝗧𝗮𝗻𝗴𝗴𝗮𝗹 ${tanggal(new Date())}` })
+break
+case 'tourl':{
+newReply('*Mohon Tunggu, Sedang Diproses*') 
+if (!quoted) return newReply(`Kirim Atau Balas Foto Dengan Perintah *${prefix + command}*`)
+let media = await arxzy.downloadAndSaveMediaMessage(quoted);
+if (/image/.test(mime)) {
+let anu = await TelegraPh(media);
+newReply(util.format(anu));
+} else if (!/image/.test(mime)) {
+let anu = await UploadFileUgu(media);
+newReply(util.format(anu));
+}
+await fs.unlinkSync(media);
+}
+break;
+case 'nulis':
+newReply(`*Pilihan Fitur Menulis*
+1. ${prefix}nuliskiri
+2. ${prefix}nuliskanan
+3. ${prefix}foliokiri
+4. ${prefix}foliokanan
 
-let audio = fs.readFileSync('./media/menu.mp3')
-arxzy.sendMessage(m.chat, { audio }, { quoted: m })
+Format:
+*${prefix}nuliskiri Teks*`)
+break
+case 'nuliskiri': {
+if (!text) return newReply(`Format: *${prefix+command} Hi, my name is Charlotte*`)
+newReply(mess.wait)
+const tulisan = body.slice(11)
+arxzy.sendMessage(m.chat, {image:{url:`https:\/\/api.zeeoneofc.my.id/api/canvas/${command}?text=${q}&apikey=charlotte`}, caption: "*Sukses*"}, {quoted: m}).catch(async _ => await newReply("*API-KEY Sedang Rusak*"))
+}
+break
+case 'nuliskanan': {
+if (!text) return newReply(`Format: *${prefix+command} Hi, my name is Charlotte*`)
+newReply(mess.wait)
+const tulisan = body.slice(12)
+arxzy.sendMessage(m.chat, {image:{url:`https:\/\/api.zeeoneofc.my.id/api/canvas/${command}?text=${q}&apikey=charlotte`}, caption: "*Sukses*"}, {quoted: m}).catch(async _ => await newReply("*API-KEY Sedang Rusak*"))
+}
+break
+case 'foliokiri': {
+if (!text) return newReply(`Format: *${prefix+command} Hi, my name is Charlotte*`)
+newReply(mess.wait)
+const tulisan = body.slice(11)
+arxzy.sendMessage(m.chat, {image:{url:`https:\/\/api.zeeoneofc.my.id/api/canvas/${command}?text=${q}&apikey=charlotte`}, caption: "*Sukses*"}, {quoted: m}).catch(async _ => await newReply("*API-KEY Sedang Rusak*"))
+}
+break
+case 'foliokanan': {
+if (!text) return newReply(`Format: *${prefix+command} Hi, my name is Charlotte*`)
+newReply(mess.wait)
+const tulisan = body.slice(12)
+arxzy.sendMessage(m.chat, {image:{url:`https:\/\/api.zeeoneofc.my.id/api/canvas/${command}?text=${q}&apikey=charlotte`}, caption: "*Sukses*"}, {quoted: m}).catch(async _ => await newReply("*API-KEY Sedang Rusak*"))
+}
+break
+case 'translate': case 'tr': {
+if (!text) return newReply(`Cara Penggunaan:
 
+1. Kirim Perintah ${prefix + command} *Kode Bahasa* *Teks*
+     Contoh: *${prefix + command} id Hallo*
 
+Daftar Bahasa Yang Di Dukung 
+*https://cloud.google.com/translate/docs/languages*`)
+let teks = m.quoted ? quoted.text : quoted.text.split(args[0])[1]
+translate(teks, { to: args[0] }).then((res) => {
+arxzy.sendText(m.chat, `${res.text}`, m)
+})
+}
+break
+case 'jarak':{
+if (!text) return newReply(`Contoh: *${prefix+command} Jakarta|Bandung*`)
+newReply(mess.wait)
+let [from, to] = text.split(/[^\w\s]/g)
+	if (!(from && to)) return newReply (`Contoh: *${prefix+command} Jakarta|Bandung*`) 
+	let data = await jarak(from, to)
+	if (data.img) return arxzy.sendMessage(m.chat, { image: data.img, caption: data.desc }, { quoted: m })
+	else newReply(data.desc)
+}
+break
+case 'tiktoksearch': case 'tiktoks': case 'ttsearch':{
+if (!text) return newReply(`Format: *${prefix+command} Kata Kunci*\nContoh: *${prefix+command} Hoshino Blue Archive*`)
+newReply(mess.wait)
+try{
+let anu = await fetchJson(`https://xzn.wtf/api/ttsearch?search=${text}&apikey=charlotte`)
+const capt = anu.title
+const author = anu.author.nickname
+arxzy.sendMessage(m.chat, { video: { url: anu.play}, caption: `💬 Keterangan: *${capt}*\n👤 Pencipta: *${author}*`}, {quoted: m})
+}catch (error) {
+newReply(`*Permintaan Gagal*`);
+}
+}
+break
+case 'pinterest': case 'pin':{
+if (!text) return newReply(`Format: *${prefix+command} *Kata Kunci*`)
+newReply(`*Mohon Tunggu, Sedang Diproses*`)
+let anu = await pinterest(text)
+let result = anu[Math.floor(Math.random() * anu.length)]
+arxzy.sendMessage(m.chat, { image: { url: result }, caption: '*Sukses*'}, { quoted: m })
+}
+
+break
+case'halloween2':case'horror':case'game8bit':case'layered':case'glitch2':case'coolg':case'coolwg':case'realistic':case'space3d':case'gtiktok':case'stone':case'marvel':case'marvel2':case'pornhub':case'avengers':case'metalr':case'metalg':case'metalg2':case'lion':case'wolf_bw':case'wolf_g':case'ninja':case'3dsteel':case'horror2':case'lava':case'bagel':{
+if (!text) return newReply(`Format: *${prefix+command} Teks1|Teks2*`)
+if (!q.includes('|')) return newReply(`Format: *${prefix+command} Teks1|Teks2*`)
+mm = args.join(' ')
+m1 = mm.split("|")[0];
+m2 = mm.split("|")[1]; 
+newReply(mess.wait)
+let texproo = await getBuffer(`https://api.zeeoneofc.my.id/api/textpro/${command}?text=${m1}&text2=${m2}&apikey=charlotte`)
+arxzy.sendMessage(m.chat, {image: texproo, caption: "*Sukses*"}, {quoted: m})
+.catch((err) => {
+newReply(util.format(err))
+})
+}
+break
+case'battlegrounds-logo': case'battlefield4': case'text-8bit':
+{
+if (!text) return newReply(`Format: *${prefix+command} Teks1|Teks2*`)
+if (!q.includes('|')) return newReply(`Format: *${prefix+command} Teks1|Teks2*`)
+mm = args.join(' ')
+m1 = mm.split("|")[0];
+m2 = mm.split("|")[1]; 
+newReply(mess.wait)
+let photooxy = await getBuffer(`https://api.zeeoneofc.my.id/api/photooxy/${command}?text=${m1}&text2=${m2}&apikey=charlotte`)
+arxzy.sendMessage(m.chat, {image: photooxy, caption: "*Sukses*"}, {quoted: m})
+.catch((err) => {
+newReply(util.format(err))
+})
+}
+break
+case'typography-flower': case'under-flower': case'bevel-text': case'silk-text': case'sweet-andy': case'smoke-typography': case'carvedwood': case'scary-cemetery': case'royallook': case'coffeecup2': case'illuminated': case'harry-potter2': case'woodblack': case'butterfly-reflection': case'watermelon': case'striking': case'metallicglow': case'rainbow-text': case'birthday-cake': case'embroidery': case'crisp': case'flaming': case'furtext': case'nightsky': case'glow-rainbow': case'gradient-avatar': case'white-cube': case'honey-text': case'vintage-style': case'glowing-3d': case'army-camouflage': case'graffiti-cover': case'rainbow-shine': case'smoky-neon': case'quotes-underfall': case'vector-nature': case'yellow-rose': case'love-text': case'underwater-ocean': case'nature-text': case'wolf-metal': case'summer-text': case'wooden-board': case'quote-wood': case'quotes-undergrass': case'naruto-banner': case'love-message': case'textoncup2': case'burn-paper': case'smoke': case'romantic-messages': case'shadow-sky': case'text-cup': case'coffecup':
+{
+if (!text) return newReply(`Format: *${prefix+command} Teks*`)
+newReply(mess.wait)
+let photooxy = await getBuffer(`https://api.zeeoneofc.my.id/api/photooxy/${command}?text=${q}&apikey=charlotte`)
+try{
+await arxzy.sendMessage(m.chat, {image: photooxy, caption: "*Sukses*"}, {quoted: m})
+}  catch (err){
+newReply(mess.error.api) 
+}
+}
+break
+case 'bard':
+try {
+if (!text) return newReply(`Format: *${prefix}${command} Kamu Kenapa?*`)
+let result = await fetchJson(`https://xzn.wtf/api/bard?text=${text}&apikey=charlotte`)
+const gpt = result.content
+newReply(`${gpt}`)
+} catch (err) {
+console.log(err)
+newReply('*Terjadi Kesalahan*')
+}
+break
+case 'ai': case 'chatgpt':
+try {
+if (!text) return newReply(`Format: *${prefix}${command} Kamu Kenapa?*`)
+let result = await fetchJson(`https://xzn.wtf/api/openai?text=${text}&apikey=charlotte`)
+const gpt = result.result
+newReply(`${gpt}`)
+} catch (err) {
+console.log(err)
+newReply('Terjadi Kesalahan*')
+}
+break
+case "aidrawing": case "image": case "img": case 'chatgptimg': case 'openaiimg': case 'aiimg':{
+if (!text) return newReply(`Format: *${prefix+command} Kata Kunci*`)
+newReply(mess.wait)
+try {
+const configuration = new Configuration({
+apiKey: `zenzkey_a22c7789e1`,
+});
+const openai = new OpenAIApi(configuration);
+const response = await openai.createImage({
+prompt: text,
+n: 1,
+size: "512x512",
+});
+arxzy.sendMessage(m.chat, {image:{url: response.data.data[0].url},caption: ""}, {quoted:m});
+} catch (error) {
+newReply(error.message);
+}
+}
+break
+case "1917text":
+            case "angelwing":
+            case "announofwin":
+            case "birthdaycake":
+            case "capercut":
+            case "cardhalloween":
+            case "christmascard":
+            case "christmasseason":
+            case "covergamepubg":
+            case "covergraffiti":
+            case "dragonfire":
+            case "embroider":
+            case "fabrictext":
+            case "facebookgold":
+            case "facebooksilver":
+            case "funnyanimations":
+            case "funnyhalloween":
+            case "galaxybat":
+            case "galaxywallpaper":
+            case "generalexam":
+            case "glowingtext":
+            case "graffiti3d":
+            case "graffititext":
+            case "graffititext2":
+            case "graffititext3":
+            case "greetingcardvideo":
+            case "halloweenbats":
+            case "heartcup":
+            case "heartflashlight":
+            case "horrorletter":
+            case "icetext":
+            case "instagramgold":
+            case "instagramsilver":
+            case "lightningpubg":
+            case "lovecard":
+            case "lovelycute":
+            case "masteryavatar":
+            case "merrycard":
+            case "messagecoffee":
+            case "metalstar":
+            case "milkcake":
+            case "modengold3":
+            case "moderngold":
+            case "moderngold2":
+            case "moderngoldsilver":
+            case "nameonheart":
+            case "noeltext":
+            case "projectyasuo":
+            case "pubgbirthday":
+            case "pubgglicthvideo":
+            case "pubgmascotlogo":
+            case "puppycute":
+            case "realembroidery":
+            case "retrotext":
+            case "rosebirthday":
+            case "snowontext":
+            case "starsnight":
+            case "summerbeach":
+            case "sunglightshadow":
+            case "textcakes":
+            case "texthalloween":
+            case "textonglass":
+            case "textsky":
+            case "thundertext":
+            case "twittergold":
+            case "twittersilver":
+            case "viettel":
+            case "vintagetelevision":
+            case "watercolor2":
+            case "womansday":
+            case "writeblood":
+            case "writegalaxy":
+            case "writehorror":
+            case "youtubegold":
+            case "youtubesilver":
+case "zombie3d": {
+if (!text) return newReply(`Format: *${prefix+command} Teks*`)
+newReply(mess.wait)
+let ephoto360= await getBuffer(`https://api.zeeoneofc.my.id/api/ephoto360/${command}?text=${q}&apikey=charlotte`)
+try{
+await arxzy.sendMessage(m.chat, {image: ephoto360, caption: "*Sukses*"}, {quoted: m})
+} catch (err){
+newReply('*Penulisan Teks Salah*') 
+}
+}
+break
+case "couple": case"ppcp":{
+let anu = await fetchJson("https://raw.githubusercontent.com/iamriz7/kopel_/main/kopel.json")
+newReply(mess.wait)
+let random = anu[Math.floor(Math.random() * anu.length)]
+arxzy.sendMessage(m.chat,{image: {url: random.male,},caption: `*Untuk Pria*`,},{quoted: m,})
+arxzy.sendMessage(m.chat,{image: {url: random.female,},caption: `*Untuk Wanita*`,},{quoted: m,})
+}
+break
+case'ssweb':
+{
+if  (!text) return newReply(`Format: *${prefix+command} URL*`)
+newReply(mess.wait)
+let ss = await getBuffer(`https://xzn.wtf/api/ssweb?type=dekstop&url=${text}&apikey=charlotte`)
+try{
+await arxzy.sendMessage(m.chat, {image: ss, caption: "*Sukses*"}, {quoted: m})
+} catch (err){
+newReply(util.format(err))
+}
+}
+break
+case'ssweb2':
+{
+if  (!text) return newReply(`Format: *${prefix+command} URL*`)
+newReply(mess.wait)
+let ss = await getBuffer(`https://xzn.wtf/api/ssweb?type=phone&url=${text}&apikey=charlotte`)
+try{
+await arxzy.sendMessage(m.chat, {image: ss, caption: "*Sukses*"}, {quoted: m})
+} catch (err){
+newReply(util.format(err))
+}
+}
+break
+case'dragonballfb':
+{
+if (!text) return newReply(`Format: *${prefix+command} Teks|Karakter*\nUntuk Daftar Karakter Ketik *.list${command}*`)
+if (!q.includes('|')) return newReply(`Format: *${prefix+command} Teks|Karakter*\nUntuk Daftar Karakter Ketik *.list${command}*`)
+mm = args.join(' ')
+m1 = mm.split("|")[0];
+m2 = mm.split("|")[1]; 
+newReply(mess.wait)
+let logo = await getBuffer(`https://api.zeeoneofc.my.id/api/ephoto360/${command}?text=${m1}&character=${m2}&apikey=charlotte`)
+arxzy.sendMessage(m.chat, {image: logo, caption: "*Sukses*"}, {quoted: m})
+.catch((err) => {
+newReply(`*Penulisan Teks Salah*`)
+})
+}
+break
+case'listdragonballfb': {
+if (!text) return newReply(`*DAFTAR KARAKTER*\n
+1 - *caulifla*
+2 - *cooler*
+3 - *cumber*
+4 - *hit*
+5 - *kale*
+6 - *kaminoren*
+7 - *gokuui*
+8 - *xenogokuss3*
+9 - *xenogokuss4*
+10 - *xenovegeta*
+11 - *xenovegito*
+12 - *android-18*
+13 - *blackgoku*
+14 - *bulma*
+15 - *frieza*
+16 - *gotenks-2*
+17 - *kaio*
+18 - *krillinandroid-18*
+19 - *launch*
+20 - *nutenroshi-2*
+21 - *oldkai*
+22 - *oolong*
+23 - *pilaf*
+24 - *tienshinhan*
+25 - *trunks-3*
+26 - *bardock*
+27 - *gotenks*
+28 - *nutenroshi*
+29 - *piccolo*
+30 - *songoku-2*
+31 - *songoku-3*
+32 - *songoten*
+33 - *trunks-2*
+34 - *vegeta-2*
+35 - *vegito*
+36 - *krillin*
+37 - *najinbuu*
+38 - *songohan*
+39 - *songoku*
+40 - *trunks*
+41 - *vegeta*`)
+}
+break
+case'banneroflol':
+{
+if (!text) return newReply(`Format: *${prefix+command} Teks1|Teks2|Karakter*\nUntuk Daftar Karakter Ketik *.list${command}*`)
+if (!q.includes('|')) return newReply(`Format: *${prefix+command} Teks1|Teks2|Karakter*\nUntuk Daftar Karakter Ketik *.list${command}*`)
+mm = args.join(' ')
+m1 = mm.split("|")[0];
+m2 = mm.split("|")[1]; 
+m3 = mm.split("|")[2]; 
+newReply(mess.wait)
+let logo = await getBuffer(`https://api.zeeoneofc.my.id/api/ephoto360/${command}?text=${m1}&text2=${m2}&banner=${m3}&apikey=charlotte`)
+arxzy.sendMessage(m.chat, {image: logo, caption: "*Sukses*"}, {quoted: m})
+.catch((err) => {
+newReply(`*Terjadi Kesalahan Pada Penulisan*`)
+})
+}
+break
+case'listbanneroflol': {
+if (!text) return newReply(`"ahri-2",
+"neeko",
+"nocturne",
+"shen-2",
+"veigar",
+"rakanayah-2",
+"zoe-2",
+"pantheon-2",
+"rammus",
+"udyr",
+"darius-2",
+"ekko-2",
+"lablanc",
+"leona",
+"nissfotune",
+"poppy",
+"quinn",
+"talon-2",
+"akali-2",
+"irelia-2",
+"jinx-2",
+"nordekaiser",
+"pyke-2",
+"renekton",
+"rengar",
+"sivir",
+"sona",
+"soraka",
+"tristana",
+"warwick",
+"yuumi",
+"ziggs",
+"leesin",
+"lulu",
+"lux",
+"naster-yi",
+"norgana",
+"nasus",
+"pantheon",
+"pyke",
+"qiyana",
+"rakan",
+"rakanxayah",
+"riven",
+"shen",
+"sylas",
+"talon",
+"teemo",
+"thresh",
+"tryndamere",
+"varus",
+"vayne",
+"velkoz",
+"vladimir",
+"yasuo",
+"zed",
+"zoe",
+"hecarim",
+"heimerdinger",
+"illaoi",
+"irelia",
+"ivern",
+"janna",
+"jarvan-iv",
+"jax",
+"jayce",
+"jhin",
+"jinx",
+"kaisa",
+"kalista",
+"karma",
+"karthus",
+"kassadin",
+"katarina",
+"kayle",
+"kayn",
+"kennen",
+"khazix",
+"kindred",
+"kled",
+"kogmaw",
+"aatrox",
+"ahri",
+"akali",
+"alistar",
+"amumu",
+"anivia",
+"annie",
+"ashe",
+"aurelionsol",
+"azir",
+"bard",
+"blitzcrank",
+"brand",
+"braum",
+"caitlyn",
+"camille",
+"cassiopeia",
+"chogath",
+"corki",
+"darius",
+"diana",
+"drmundo",
+"draven",
+"ekko",
+"elise",
+"evelynn",
+"ezreal",
+"fiddlesticks",
+"fiora",
+"fizz",
+"galio",
+"gangplank",
+"garen",
+"gnar",
+"gragas",
+"graves"`)
+}
+break
             case 'menu':
             case 'help':
-let audioFiles = [
-  fs.readFileSync('./media/m1.mp3'),
-  fs.readFileSync('./media/m2.mp3'),
-  fs.readFileSync('./media/m3.mp3'),
-  fs.readFileSync('./media/m4.mp3'),
-  fs.readFileSync('./media/m5.mp3'),
-];
-
-let randomIndex = Math.floor(Math.random() * audioFiles.length);
-
-let randomAudio = await fetch(audioFiles[randomIndex]).then(response => response.blob());
-
-arxzy.sendMessage(m.chat, { audio: randomAudio }, { quoted: m });
-
+let audios = fs.readFileSync('./media/menu.mp3')
+arxzy.sendMessage(m.chat, { audios }, { quoted: m })
                 let mono = '```'
                 let menunya = `
-*Hᴀʟʟᴏ ${pushname} 👋*
+*Hai ${pushname} 👋*
 
 ${readmore}
-*INFO BOT & PENGGUNA*
-• Nᴀᴍᴀ Bᴏᴛ: Cʜᴀʀʟᴏᴛᴛᴇ
-• Rɪʟɪs: 10 Oᴋᴛᴏʙᴇʀ 2023
-• Vᴇʀsɪ: 0.1.03
-• Tᴏᴛᴀʟ Hɪᴛ: ${JSON.parse(fs.readFileSync('./src/total-hit-user.json'))[0].hit_cmd} Hɪᴛ
-• Tᴏᴛᴀʟ Pᴇɴɢɢᴜɴᴀ: ${Object.keys(_user).length} Pᴇɴɢɢᴜɴᴀ
-• Sᴛᴀᴛᴜs Pᴇɴɢɢᴜɴᴀ: ${isPremium ? "Pʀᴇᴍɪᴜᴍ" : "Tᴀɴᴘᴀ Pʀᴇᴍɪᴜᴍ"}
+*DASHBOARD*
+*— For Bot Charlotte*
+• Nama: Charlotte
+• Pemilik: wa.me/15342774249
+• Rilis: 10 Oktober 2023
+• Versi: 24.10.23
+• Fitur: 692
+• Api Digunakan:
+  × api.lolhuman.xyz
+  × api.zeeoneofc.my.id
+  × api.zahwazein.xyz
+  × api.xzn.wtf
+• Prefix: Multi
+• Berjalan: Railway.app
+• Total Hit: ${JSON.parse(fs.readFileSync('./src/total-hit-user.json'))[0].hit_cmd} Hit
+• Total Pengguna: ${Object.keys(_user).length} Pengguna
 
-*Gʀᴀᴛɪs Dɪᴛᴀᴍʙᴀʜᴋᴀɴ Kᴇɢʀᴜᴘ*
-*Lɪʜᴀᴛ Tᴀᴜᴛᴀɴ Dɪʙᴀᴡᴀʜ Iɴɪ*
-*— msha.ke/charlotte_page*
+*— For Bot User*
+• Nama: ${pushname}
+• Status: ${isPremium ? "Premium" : "Dasar"}
 
 ${readmore}
-Cᴏ-Oᴘ Yᴜᴋ *UID: 836400938*
+Co-Op Yuk *UID: 836400938*
 
 ${readmore}
+*TERBARU / FIX*
+${mono}${prefix}differentme 
+${prefix}diffusion
+${prefix}txt2img
+${prefix}aiscene
+${prefix}toanime
+${prefix}nobg
+${prefix}resize
+${prefix}qc
+${prefix}galau
+${prefix}postig
+${prefix}brazzers
+${prefix}triggered
+${prefix}jail
+${prefix}wasted
+${prefix}beautiful
+${prefix}fire
+${prefix}wanted
+${prefix}rip
+${prefix}awoawo
+${prefix}kawan-sponsbob
+${prefix}sponsbob
+${prefix}popoci
+${prefix}patrick
+${prefix}gojosatoru
+${prefix}doge
+${prefix}dino-kuning
+${prefix}dbfly
+${prefix}chat
+${prefix}manusia-lidi
+${prefix}kucing
+${prefix}kr-robot
+${prefix}jisoo
+${prefix}hope-boy
+${prefix}menjamet
+${prefix}meow
+${prefix}nicholas
+${prefix}tyni
+${prefix}lonte
+${prefix}nulis
+${prefix}nuliskiri
+${prefix}nuliskanan
+${prefix}foliokiri
+${prefix}foliokanan
+${prefix}jarak
+${prefix}tiktoks
+${prefix}tiktoksearch
+${prefix}pinterest
+${prefix}halloween2
+${prefix}horror
+${prefix}game8bit
+${prefix}layered
+${prefix}glitch2
+${prefix}coolg
+${prefix}coolwg
+${prefix}realistic
+${prefix}space3d
+${prefix}gtiktok
+${prefix}stone
+${prefix}marvel
+${prefix}marvel2
+${prefix}pornhub
+${prefix}avengers
+${prefix}metalr
+${prefix}metalg
+${prefix}metalg2
+${prefix}lion
+${prefix}wolf_bw
+${prefix}wolf_g
+${prefix}ninja
+${prefix}3dsteel
+${prefix}horror2
+${prefix}lava
+${prefix}bagel
+${prefix}battlefield4
+${prefix}typography-flower
+${prefix}under-flower
+${prefix}bevel-text
+${prefix}silk-text
+${prefix}sweet-andy
+${prefix}smoke-typography
+${prefix}carvedwood
+${prefix}scary-cemetery
+${prefix}royallook
+${prefix}coffeecup2
+${prefix}illuminated
+${prefix}harry-potter2
+${prefix}woodblack
+${prefix}butterfly-reflection
+${prefix}watermelon
+${prefix}striking
+${prefix}metallicglow
+${prefix}rainbow-text
+${prefix}birthday-cake
+${prefix}embroidery
+${prefix}crisp
+${prefix}flaming
+${prefix}furtext
+${prefix}nightsky
+${prefix}glow-rainbow
+${prefix}gradient-avatar
+${prefix}white-cube
+${prefix}honey-text
+${prefix}vintage-style
+${prefix}glowing-3d
+${prefix}army-camouflage
+${prefix}graffiti-cover
+${prefix}rainbow-shine
+${prefix}smoky-neon
+${prefix}quotes-underfall
+${prefix}vector-nature
+${prefix}yellow-rose
+${prefix}love-text
+${prefix}underwater-ocean
+${prefix}nature-text
+${prefix}wolf-metal
+${prefix}summer-text
+${prefix}wooden-board
+${prefix}quote-wood
+${prefix}quotes-undergrass
+${prefix}naruto-banner
+${prefix}love-message
+${prefix}textoncup2
+${prefix}burn-paper
+${prefix}smoke
+${prefix}romantic-messages
+${prefix}shadow-sky
+${prefix}text-cup
+${prefix}coffecup
+${prefix}1917text
+${prefix}angelwing
+${prefix}announofwin
+${prefix}birthdaycake
+${prefix}capercut
+${prefix}cardhalloween
+${prefix}christmascard
+${prefix}christmasseason
+${prefix}covergamepubg
+${prefix}covergraffiti
+${prefix}dragonfire
+${prefix}embroider
+${prefix}fabrictext
+${prefix}facebookgold
+${prefix}facebooksilver
+${prefix}funnyanimations
+${prefix}funnyhalloween
+${prefix}galaxybat
+${prefix}galaxywallpaper
+${prefix}generalexam
+${prefix}glowingtext
+${prefix}graffiti3d
+${prefix}graffititext
+${prefix}graffititext2
+${prefix}graffititext3
+${prefix}greetingcardvideo
+${prefix}halloweenbats
+${prefix}heartcup
+${prefix}heartflashlight
+${prefix}horrorletter
+${prefix}icetext
+${prefix}instagramgold
+${prefix}instagramsilver
+${prefix}lightningpubg
+${prefix}lovecard
+${prefix}lovelycute
+${prefix}masteryavatar
+${prefix}merrycard
+${prefix}messagecoffee
+${prefix}metalstar
+${prefix}milkcake
+${prefix}modengold3
+${prefix}moderngold
+${prefix}moderngold2
+${prefix}moderngoldsilver
+${prefix}nameonheart
+${prefix}noeltext
+${prefix}projectyasuo
+${prefix}pubgbirthday
+${prefix}pubgglicthvideo
+${prefix}pubgmascotlogo
+${prefix}puppycute
+${prefix}realembroidery
+${prefix}retrotext
+${prefix}rosebirthday
+${prefix}snowontext
+${prefix}starsnight
+${prefix}summerbeach
+${prefix}sunglightshadow
+${prefix}textcakes
+${prefix}texthalloween
+${prefix}textonglass
+${prefix}textsky
+${prefix}thundertext
+${prefix}twittergold
+${prefix}twittersilver
+${prefix}viettel
+${prefix}vintagetelevision
+${prefix}watercolor2
+${prefix}womansday
+${prefix}writeblood
+${prefix}writegalaxy
+${prefix}writehorror
+${prefix}youtubegold
+${prefix}youtubesilver
+${prefix}zombie3d
+${prefix}dragonballfb
+${prefix}listdragonballfb
+${prefix}banneroflol
+${prefix}listbanneroflol${mono}
+
 *UTAMA*
 ${mono}${prefix}botstatus 
 ${prefix}buypremium
@@ -6691,7 +7625,37 @@ ${prefix}highfive
 ${prefix}handhold${mono}
 
 *INTERNET*
-${mono}${prefix}define
+${mono}${prefix}galau
+${prefix}postig
+${prefix}brazzers
+${prefix}triggered
+${prefix}jail
+${prefix}wasted
+${prefix}beautiful
+${prefix}fire
+${prefix}wanted
+${prefix}rip
+${prefix}awoawo
+${prefix}kawan-sponsbob
+${prefix}sponsbob
+${prefix}popoci
+${prefix}patrick
+${prefix}gojosatoru
+${prefix}doge
+${prefix}dino-kuning
+${prefix}dbfly
+${prefix}chat
+${prefix}manusia-lidi
+${prefix}kucing
+${prefix}kr-robot
+${prefix}jisoo
+${prefix}hope-boy
+${prefix}menjamet
+${prefix}meow
+${prefix}nicholas
+${prefix}tyni
+${prefix}lonte
+${prefix}define
 ${prefix}drakorongoing
 ${prefix}artimimpi
 ${prefix}growtopia
@@ -6745,7 +7709,25 @@ ${prefix}profilepic
 ${prefix}couplepic${mono}
 
 *ALAT*
-${mono}${prefix}qc
+${mono}${prefix}bard
+${prefix}chatgpt
+${prefix}ppcp
+${prefix}ssweb
+${prefix}ssweb2
+${prefix}nulis
+${prefix}nuliskiri
+${prefix}nuliskanan
+${prefix}foliokiri
+${prefix}foliokanan
+${prefix}jarak
+${prefix}differentme 
+${prefix}diffusion
+${prefix}txt2img
+${prefix}aiscene
+${prefix}toanime
+${prefix}nobg
+${prefix}resize
+${prefix}qc
 ${prefix}ttp
 ${prefix}attp
 ${prefix}removebg
@@ -6802,7 +7784,10 @@ ${prefix}igdl
 ${prefix}igdlh
 ${prefix}pindl
 ${prefix}ytplay
-${prefix}spotifydl${mono}
+${prefix}spotifydl
+${prefix}tiktoks
+${prefix}tiktoksearch
+${prefix}pinterest${mono}
 
 *GRUP*
 ${mono}${prefix}closetime
@@ -6981,6 +7966,169 @@ ${prefix}huluh
 ${prefix}heleh
 ${prefix}hilih
 ${prefix}holoh${mono}
+
+*FOTO*
+${mono}${prefix}halloween2
+${prefix}horror
+${prefix}game8bit
+${prefix}layered
+${prefix}glitch2
+${prefix}coolg
+${prefix}coolwg
+${prefix}realistic
+${prefix}space3d
+${prefix}gtiktok
+${prefix}stone
+${prefix}marvel
+${prefix}marvel2
+${prefix}pornhub
+${prefix}avengers
+${prefix}metalr
+${prefix}metalg
+${prefix}metalg2
+${prefix}lion
+${prefix}wolf_bw
+${prefix}wolf_g
+${prefix}ninja
+${prefix}3dsteel
+${prefix}horror2
+${prefix}lava
+${prefix}bagel
+${prefix}battlefield4
+${prefix}typography-flower
+${prefix}under-flower
+${prefix}bevel-text
+${prefix}silk-text
+${prefix}sweet-andy
+${prefix}smoke-typography
+${prefix}carvedwood
+${prefix}scary-cemetery
+${prefix}royallook
+${prefix}coffeecup2
+${prefix}illuminated
+${prefix}harry-potter2
+${prefix}woodblack
+${prefix}butterfly-reflection
+${prefix}watermelon
+${prefix}striking
+${prefix}metallicglow
+${prefix}rainbow-text
+${prefix}birthday-cake
+${prefix}embroidery
+${prefix}crisp
+${prefix}flaming
+${prefix}furtext
+${prefix}nightsky
+${prefix}glow-rainbow
+${prefix}gradient-avatar
+${prefix}white-cube
+${prefix}honey-text
+${prefix}vintage-style
+${prefix}glowing-3d
+${prefix}army-camouflage
+${prefix}graffiti-cover
+${prefix}rainbow-shine
+${prefix}smoky-neon
+${prefix}quotes-underfall
+${prefix}vector-nature
+${prefix}yellow-rose
+${prefix}love-text
+${prefix}underwater-ocean
+${prefix}nature-text
+${prefix}wolf-metal
+${prefix}summer-text
+${prefix}wooden-board
+${prefix}quote-wood
+${prefix}quotes-undergrass
+${prefix}naruto-banner
+${prefix}love-message
+${prefix}textoncup2
+${prefix}burn-paper
+${prefix}smoke
+${prefix}romantic-messages
+${prefix}shadow-sky
+${prefix}text-cup
+${prefix}coffecup
+${prefix}1917text
+${prefix}angelwing
+${prefix}announofwin
+${prefix}birthdaycake
+${prefix}capercut
+${prefix}cardhalloween
+${prefix}christmascard
+${prefix}christmasseason
+${prefix}covergamepubg
+${prefix}covergraffiti
+${prefix}dragonfire
+${prefix}embroider
+${prefix}fabrictext
+${prefix}facebookgold
+${prefix}facebooksilver
+${prefix}funnyanimations
+${prefix}funnyhalloween
+${prefix}galaxybat
+${prefix}galaxywallpaper
+${prefix}generalexam
+${prefix}glowingtext
+${prefix}graffiti3d
+${prefix}graffititext
+${prefix}graffititext2
+${prefix}graffititext3
+${prefix}greetingcardvideo
+${prefix}halloweenbats
+${prefix}heartcup
+${prefix}heartflashlight
+${prefix}horrorletter
+${prefix}icetext
+${prefix}instagramgold
+${prefix}instagramsilver
+${prefix}lightningpubg
+${prefix}lovecard
+${prefix}lovelycute
+${prefix}masteryavatar
+${prefix}merrycard
+${prefix}messagecoffee
+${prefix}metalstar
+${prefix}milkcake
+${prefix}modengold3
+${prefix}moderngold
+${prefix}moderngold2
+${prefix}moderngoldsilver
+${prefix}nameonheart
+${prefix}noeltext
+${prefix}projectyasuo
+${prefix}pubgbirthday
+${prefix}pubgglicthvideo
+${prefix}pubgmascotlogo
+${prefix}puppycute
+${prefix}realembroidery
+${prefix}retrotext
+${prefix}rosebirthday
+${prefix}snowontext
+${prefix}starsnight
+${prefix}summerbeach
+${prefix}sunglightshadow
+${prefix}textcakes
+${prefix}texthalloween
+${prefix}textonglass
+${prefix}textsky
+${prefix}thundertext
+${prefix}twittergold
+${prefix}twittersilver
+${prefix}viettel
+${prefix}vintagetelevision
+${prefix}watercolor2
+${prefix}womansday
+${prefix}writeblood
+${prefix}writegalaxy
+${prefix}writehorror
+${prefix}youtubegold
+${prefix}youtubesilver
+${prefix}zombie3d
+${prefix}dragonballfb
+${prefix}listdragonballfb
+${prefix}banneroflol
+${prefix}listbanneroflol${mono}
 
 *PEMILIK*
 ${mono}${prefix}delsesi
