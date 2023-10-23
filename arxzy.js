@@ -6502,36 +6502,6 @@ if (!text) return newReply ('Format: *.qc Teks*')
 let qc = `https://xzn.wtf/api/qc?text=${text}&username=${pushname}&avatar=https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSsA4yNn3pILbEZv5_QAf0hV-hA_E38lNNa0w&usqp=CAU&apikey=charlotte`
 arxzy.sendImageAsSticker(from, qc, m, { packname: global.packname, author: `𝗗𝗶𝗯𝘂𝗮𝘁 𝗢𝗹𝗲𝗵 𝗕𝗼𝘁 𝗖𝗵𝗮𝗿𝗹𝗼𝘁𝘁𝗲 - 𝟬𝟴𝟱𝟭𝟱𝟵𝟮𝟱𝟴𝟴𝟯𝟬\n𝗣𝗮𝗱𝗮 𝗧𝗮𝗻𝗴𝗴𝗮𝗹 ${tanggal(new Date())}` })
 break
-case 'differentme': {
-if (!quoted) return newReply(`Kirim Atau Balas Foto Dengan Perintah *${prefix + command}*`)
-if (!/image/.test(mime)) return newReply(`Kirim Atau Balas Foto Dengan Perintah *${prefix + command}*`)
-try{
-const media = await juna.downloadAndSaveMediaMessage(quoted)
-const anu = await TelegraPh(media)
-const img = await fetch (`https://xzn.wtf/api/aimirror?&apikey=charlotte&url=${anu}&filter=${text}`) 
-const p = await img.json()
-if (p.status !== 200) throw '*Filter Tidak Ditemukan*'
-const imgs = p.generated_image_addresses
-const capt = p.time_processing
-arxzy.sendMessage(m.chat, { image: { url: imgs }, caption: `*Sukses, Dibuat Selama ${capt}*`}, { quoted: m})
-}catch (error) {
-newReply(`*Masukkan Nama Filter Yang Valid*\nDaftar Filter:\n- anime_2d\n- realistic_custom\n- only_goth\n- egyptian_pharaoh\n- anime_custom\n- romance_comic\n- cartoon_3d\n- pirate_tale\n- starry_girl\n- doodle\n- watercolor\n- superhero_comic\n- american_comics\n- marimo_ronin\n- pixelart\n- vintage_newspaper\n- maid_dressing\n- christmas_anime\n- biohazard\n- dark_gothic\n- pretty_soldier\n- bizarre_journey\n- fire_fist\n\nFormat: - anime_2d\n- realistic_custom\n- only_goth\n- egyptian_pharaoh\n- anime_custom\n- romance_comic\n- cartoon_3d\n- pirate_tale\n- starry_girl\n- doodle\n- watercolor\n- superhero_comic\n- american_comics\n- marimo_ronin\n- pixelart\n- vintage_newspaper\n- maid_dressing\n- christmas_anime\n- biohazard\n- dark_gothic\n- pretty_soldier\n- bizarre_journey\n- fire_fist\n\nContoh: .differentme anime_2d`)
-newReply('*Mohon Tunggu, Sedang Diproses*')
-}
-}
-break
-case 'diffusion': case 'stabledif': case 'diff':{
-if (!text) throw `*Masuk-kan Prompt-nya*\nFormat: *${prefix+command} ultra realistic close up portrait ((beautiful pale cyberpunk female with heavy black eyeliner)), blue eyes, shaved side haircut, hyper detail, cinematic lighting, magic neon, dark red city, Canon EOS R3, nikon, f/1.4, ISO 200, 1/160s, 8K, RAW, unedited, symmetrical balance, in-frame, 8K*`
-m.reply(mess.wait)
-try {
-let anu = await diff(text)
-let hasil = await processing(anu, "enhance");
-juna.sendFile(m.chat, hasil, 'anu.jpg', `Prompt: ${text}`, m)
-     } catch (e) {
-m.reply(eror)
-}
-}
-break
 case 'aidraw':
 case 'txt2img':{
 if (!text) throw '*Masuk-kan Prompt-nya*\nFormat: *.txt2img 1girl, with glasses, in beach*'
@@ -7211,8 +7181,8 @@ if (!text) return newReply(`"ahri-2",
 break
             case 'menu':
             case 'help':
-let audios = fs.readFileSync('./media/menu.mp3')
-arxzy.sendMessage(m.chat, { audios }, { quoted: m })
+let audio = fs.readFileSync('./media/menu.mp3')
+arxzy.sendMessage(m.chat, { audio }, { quoted: m })
                 let mono = '```'
                 let menunya = `
 *Hai ${pushname} 👋*
@@ -7236,7 +7206,6 @@ ${readmore}
 • Total Pengguna: ${Object.keys(_user).length} Pengguna
 
 *— For Bot User*
-• Nama: ${pushname}
 • Status: ${isPremium ? "Premium" : "Dasar"}
 
 ${readmore}
@@ -7244,8 +7213,7 @@ Co-Op Yuk *UID: 836400938*
 
 ${readmore}
 *TERBARU / FIX*
-${mono}${prefix}differentme 
-${prefix}diffusion
+${mono}${prefix}aidraw
 ${prefix}txt2img
 ${prefix}aiscene
 ${prefix}toanime
@@ -7720,8 +7688,7 @@ ${prefix}nuliskanan
 ${prefix}foliokiri
 ${prefix}foliokanan
 ${prefix}jarak
-${prefix}differentme 
-${prefix}diffusion
+${prefix}aidraw
 ${prefix}txt2img
 ${prefix}aiscene
 ${prefix}toanime

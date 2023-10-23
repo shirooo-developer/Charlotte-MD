@@ -13,7 +13,7 @@ global.xzn = 'charlotte' // https://xzn.wtf
 global.numberowner = '15342774249' // Owner Utama
 global.owner = ['15342774249'] // Owner Lainnya
 global.namaowner = 'not available' // Nama Owner
-global.premium = ["15342774249","6281249122429","6285163083750"] // Premium User
+global.premium = ['15342774249','6281249122429','6285163083750'] // Premium User
 global.nobot = '6285159258830'
 /* ~~~~~~~~~ SETTINGS BOT ~~~~~~~~~ */
 global.namabot = 'Charlotte-MD' // NickBot
@@ -35,7 +35,7 @@ global.mess = {
     group: '*Fitur Hanya Dapat Digunakan Digrup*',
     private: '*Fitur Hanya Dapat Digunakan Dichat Pribadi*',
     wait: '*Mohon Tunggu, Sedang Diproses*',    
-    error: '*Maaf Fitur Rusak*',
+    error: '*Maaf Fitur Rusak*'
 }
 /* ~~~~~~~~~ THUMBNAIL ~~~~~~~~~ */
 global.thumb = fs.readFileSync('./media/quoted.jpg')
