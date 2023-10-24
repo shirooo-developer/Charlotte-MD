@@ -6504,7 +6504,7 @@ arxzy.sendImageAsSticker(from, qc, m, { packname: global.packname, author: `𝗗
 break
 case 'aidraw':
 case 'txt2img':{
-if (!text) throw '*Masuk-kan Prompt-nya*\nFormat: *.txt2img 1girl, with glasses, in beach*'
+if (!q) return newReply(`*Masuk-kan Prompt-nya*\nFormat: *.txt2img 1girl, with glasses, in beach*`)
 newReply(`*Mohon Tunggu, Sedang Diproses*`)
 try {
 let txt = await getBuffer(`https://xzn.wtf/api/txt2img?text=${text}&apikey=charlotte`)
@@ -7208,7 +7208,7 @@ ${readmore}
 *— For Bot User*
 • Status: ${isPremium ? "Premium" : "Dasar"}
 
-*Sebagian Fitur Baru Tidak Berfungsi*
+*⚠️ Sebagian Fitur Baru Tidak Berfungsi*
 *Dikarenakan Salah Satu API Error*
 
 ${readmore}
