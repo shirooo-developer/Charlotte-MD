@@ -1640,7 +1640,7 @@ ${cpus.map((cpu, i) => `${i + 1}. ${cpu.model.trim()} (${cpu.speed} MHZ)\n${Obje
                 if (!emoji1) return newReply(`Format: *${prefix + command} 😅+🤔*`)
                 if (!emoji2) return newReply(`Format: *${prefix + command} 😅+🤔*`)
                 newReply(mess.wait)
-                let anu = await fetchJson(`https://tenor.googleapis.com/v2/featured?key=AIzaSyAyimkuYQYF_FXVALexPuGQctUWRURdCYQ&contentfilter=high&media_filter=png_transparent&component=proactive&collection=emoji_kitchen_v5&q=${encodeURIComponent(emoji1)}_${encodeURIComponent(emoji2)}`)
+                let anu = await fetchJson(`https://tenor.googleapis.com/v2/featured?key=AIzaSyAyimkuYQYF_FXVALexPuGptUWRURdCYQ&contentfilter=high&media_filter=png_transparent&component=proactive&collection=emoji_kitchen_v5&q=${encodeURIComponent(emoji1)}_${encodeURIComponent(emoji2)}`)
                 for (let res of anu.results) {
                     let encmedia = await arxzy.sendImageAsSticker(m.chat, res.url, m, {
                         packname: global.packname,
@@ -7207,6 +7207,9 @@ ${readmore}
 
 *— For Bot User*
 • Status: ${isPremium ? "Premium" : "Dasar"}
+
+*Sebagian Fitur Baru Tidak Berfungsi*
+*Dikarenakan Salah Satu API Error*
 
 ${readmore}
 Co-Op Yuk *UID: 836400938*
