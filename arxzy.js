@@ -7191,7 +7191,7 @@ ${readmore}
 *DASHBOARD*
 *— For Bot Charlotte*
 • Nama: Charlotte
-• Pemilik: wa.me/15342774249
+• Pemilik: 15342774249
 • Rilis: 10 Oktober 2023
 • Versi: 24.10.23
 • Fitur: 692
@@ -7208,11 +7208,14 @@ ${readmore}
 *— For Bot User*
 • Status: ${isPremium ? "Premium" : "Dasar"}
 
-*⚠️ Sebagian Fitur Baru Tidak Berfungsi*
+*Cara Menambahkan Secara Gratis Ke Grup*
+— https://msha.ke/charlotte_page#about
+
+*Sebagian Fitur Baru Tidak Berfungsi*
 *Dikarenakan Salah Satu API Error*
 
 ${readmore}
-Co-Op Yuk *UID: 836400938*
+Co-Op Yuk *UID:* 836400938
 
 ${readmore}
 *TERBARU / FIX*
@@ -7262,6 +7265,7 @@ ${prefix}jarak
 ${prefix}tiktoks
 ${prefix}tiktoksearch
 ${prefix}pinterest
+${prefix}ppcp
 ${prefix}halloween2
 ${prefix}horror
 ${prefix}game8bit
